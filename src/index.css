@@ -1,0 +1,29 @@
+:root {
+  --app-color-background: #ede7e3;
+  --app-color-text-default: #16697a;
+  --app-color-task-background: white;
+  --app-color-task-marked-background: #82c0cc;
+  --app-color-reward-background: #ffa62b;
+  --app-color-reward-marked-background: #ffa62b;
+
+  font-family: "Roboto Condensed", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.5;
+
+  color: var(--app-color-text-default);
+  background-color: var(--app-color-background);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}

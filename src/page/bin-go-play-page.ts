@@ -1,0 +1,176 @@
+import {LitElement, css, html, nothing} from 'lit'
+import {customElement, state} from 'lit/decorators.js'
+import {BinGoCellState, BinGoState, Storage} from "../storage.ts";
+import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
+import {getISOWeek} from "date-fns/getISOWeek";
+import {getYear} from "date-fns/getYear";
+
+
+@customElement('bin-go-play-page')
+export class BinGoPlayPage extends LitElement {
+
+    private readonly storage = new Storage()
+
+    @state()
+    private readonly state?: BinGoState
+
+    constructor() {
+        super();
+
+        let state = this.storage.getState()
+
+        // if there is no game state or if the game state has expired, create new game state
+        if (!state || this.hasExpired(state)) {
+            const config = this.storage.getConfig()
+            if (!config) {
+                throw new Error('IllegalStateException')
+            }
+            state = new BinGoStateBuilder(config).createState()
+            this.storage.updateState(state)
+        }
+
+        this.state = state;
+    }
+
+    private hasExpired(_state: BinGoState) {
+        const stateDate = new Date(_state.createdAt)
+        const currentDate = new Date()
+
+        const stateWeek = getISOWeek(stateDate)
+        const stateYear = getYear(stateDate)
+        const currentWeek = getISOWeek(currentDate)
+        const currentYear = getYear(currentDate)
+
+        console.log(`Checking state for expiration - state week ${stateWeek}/${stateYear} <-> current week: ${currentWeek}/${currentYear}`)
+        if (stateWeek !== currentWeek || getYear(stateDate) !== getYear(currentDate)) {
+            console.log('State has expired.')
+            return true;
+        }
+        return false;
+    }
+
+    render() {
+        return html`
+            <h1>Play Mode</h1>
+            ${this.renderBoard()}
+            <div class="action-bar">
+                <a class="link" href="#" @click="${this.sendEdit}">Edit</a>
+            </div>
+        `
+    }
+
+    private renderBoard() {
+        if (!this.state) {
+            return nothing
+        }
+        const state = this.state;
+
+        const cells: { state: BinGoCellState, reward: boolean }[] = []
+        cells.push(...[0, 1, 2].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
+        cells.push({ state: this.state.rewards[0], reward: true })
+        cells.push(...[3, 4, 5].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
+        cells.push({ state: this.state.rewards[1], reward: true })
+        cells.push(...[6, 7, 8].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
+        cells.push(...this.state.rewards.slice(2).map(cell => ({ state: cell, reward: true })))
+
+        return html`
+            <div class="board">
+                ${cells.map(cell => html`
+                    <div class="cell ${cell.reward ? 'reward' : 'task'} ${cell.state.marked ? 'marked' : ''}" @click="${() => this.mark(cell)}">
+                        <div class="label">${cell.state.name}</div>
+                    </div>`)}
+            </div>
+        `
+    }
+
+    private mark(cell: { state: BinGoCellState, reward: boolean }) {
+        if (cell.state.marked || cell.reward || !this.state) {
+            return
+        }
+        const state = this.state;
+
+        cell.state.marked = true;
+
+        // line 1/2/3
+        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[0].marked = true);
+        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[1].marked = true);
+        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[2].marked = true);
+
+        // column 1/2/3
+        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[3].marked = true);
+        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[4].marked = true);
+        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[5].marked = true);
+
+        this.storage.updateState(this.state)
+        this.requestUpdate()
+    }
+
+    private sendEdit() {
+        const event = new CustomEvent('edit', {
+            detail: 'edit',
+            bubbles: true,
+            composed: true
+        });
+
+        this.dispatchEvent(event);
+    }
+
+    static styles = css`
+        :host {
+            .board {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                grid-gap: 8px;
+            }
+            
+            .cell {
+                padding: 0.5rem;
+                border-radius: 5px;
+                display: flex;
+                user-select: none;
+            }
+
+            .cell .label {
+                margin: auto;
+                text-transform: uppercase;
+            }
+            
+            .cell.task {
+                cursor: pointer;
+                background: white;
+                font-size: 2.5rem;
+            }
+            
+            .cell.task.marked {
+                background: #82c0cc;
+                cursor: default;
+            }
+            
+            .cell.reward {
+                background: #ffa62b;
+            }
+            
+            .cell.reward.marked {
+                background: #ffa62b;
+                opacity: 0.25;
+            }
+            
+            .action-bar {
+                margin-top: 1.5rem;
+            }
+            
+            .link {
+                color: #16697a;
+                text-decoration: underline;
+            }
+            .link:hover {
+                color: #ffa62b;
+            }
+        }`
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'bin-go-play-page': BinGoPlayPage
+    }
+}
