@@ -26,22 +26,12 @@ export class BinGoApp extends LitElement {
     }
 
     render() {
-        // TODO: check storage - if there this is first time visit, show editor
-        // TODO: develop editor page -> add up to 9 tasks and 6 treats (include version nr)
-        // TODO: create random grid and store it (timestamp, version)
-        // TODO: show grid
-        // TODO: allow finish of tasks and receive treats
-        // TODO: store hobby coins indefinitely
-        // TODO: reset grid and treats (other than hobby coins) every week (upon entering)
-        // TODO: go back to edit mode - fix all related update problems
-        // TODO: add icon support
-        // TODO: styling
-        // TODO: pwa support
-        // TODO: deploy on github
-        // TODO: add support for partial treats
-        // TODO: add splash screen for received completed treats
-        // TODO: add helper text / branding etc. / polish
+        // TODO: allow uncheck of cells (error correction) - revert reward collection!
+        // TODO: add hobby investment coins (editor option, reward generation on state creation)
         // TODO: allow spending of hobby coins
+        // TODO: remember collected rewards in storage (inventory)
+        // TODO: deploy on github
+        // TODO: pwa support
 
         return html`
             ${this.editMode ? html`

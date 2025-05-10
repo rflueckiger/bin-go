@@ -4,7 +4,7 @@ import {BinGoCellState, BinGoState, Storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
-
+import '../component/bin-go-task-cell.ts'
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -65,31 +65,39 @@ export class BinGoPlayPage extends LitElement {
         }
         const state = this.state;
 
-        const cells: { state: BinGoCellState, reward: boolean }[] = []
-        cells.push(...[0, 1, 2].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
-        cells.push({ state: this.state.rewards[0], reward: true })
-        cells.push(...[3, 4, 5].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
-        cells.push({ state: this.state.rewards[1], reward: true })
-        cells.push(...[6, 7, 8].map(i => state.tasks[i]).map(cell => ({ state: cell, reward: false })))
-        cells.push(...this.state.rewards.slice(2).map(cell => ({ state: cell, reward: true })))
+        const cellStates: BinGoCellState[] = []
+        cellStates.push(...[0, 1, 2].map(i => state.tasks[i]))
+        cellStates.push(this.state.rewards[0])
+        cellStates.push(...[3, 4, 5].map(i => state.tasks[i]))
+        cellStates.push(this.state.rewards[1])
+        cellStates.push(...[6, 7, 8].map(i => state.tasks[i]))
+        cellStates.push(...this.state.rewards.slice(2))
 
         return html`
             <div class="board">
-                ${cells.map(cell => html`
-                    <div class="cell ${cell.reward ? 'reward' : 'task'} ${cell.state.marked ? 'marked' : ''}" @click="${() => this.mark(cell)}">
-                        <div class="label">${cell.state.name}</div>
-                    </div>`)}
+                ${cellStates.map(cellState => this.renderCell(cellState))}
             </div>
         `
     }
 
-    private mark(cell: { state: BinGoCellState, reward: boolean }) {
-        if (cell.state.marked || cell.reward || !this.state) {
+    private renderCell(cellState: BinGoCellState) {
+        if (cellState.type === 'task') {
+            return html`<bin-go-task-cell .cellState="${cellState}" @marked="${this.marked}" ></bin-go-task-cell>`
+        } else if (cellState.type === 'reward') {
+            return html`
+                <div class="cell reward ${cellState.marked ? 'marked' : ''}">
+                    <div class="label">${cellState.name}</div>
+                </div>`
+        }
+        return nothing
+    }
+
+    private marked() {
+        if (!this.state) {
             return
         }
-        const state = this.state;
 
-        cell.state.marked = true;
+        const state = this.state;
 
         // line 1/2/3
         [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[0].marked = true);
@@ -133,17 +141,6 @@ export class BinGoPlayPage extends LitElement {
             .cell .label {
                 margin: auto;
                 text-transform: uppercase;
-            }
-            
-            .cell.task {
-                cursor: pointer;
-                background: white;
-                font-size: 2.5rem;
-            }
-            
-            .cell.task.marked {
-                background: #82c0cc;
-                cursor: default;
             }
             
             .cell.reward {

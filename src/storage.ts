@@ -12,6 +12,8 @@ export interface BinGoState {
 }
 
 export interface BinGoCellState {
+    type: 'task' | 'reward',
+    id: number,
     name: string,
     marked: boolean
 }
@@ -83,6 +85,34 @@ export class Storage {
 
         console.log('Updating state...')
         localStorage.setItem('state', JSON.stringify(state));
+    }
+
+    public updateCellState(cellState: BinGoCellState) {
+        console.log(`Updating state of cell (${cellState.id}) ...`)
+        const state = this.getState();
+        if (!state) {
+            throw new Error('IllegalStateError')
+        }
+
+        const existingCellState = Storage.findCellState(state, cellState.type, cellState.id)
+        if (!existingCellState) {
+            throw new Error('IllegalStateError')
+        }
+
+        existingCellState.marked = cellState.marked
+        this.updateState(state);
+    }
+
+    private static findCellState(state: BinGoState, type: 'task' | 'reward', id: number): BinGoCellState | undefined {
+        let cellStates
+        if (type === 'task') { cellStates = state.tasks }
+        if (type === 'reward') { cellStates = state.rewards }
+
+        if (!cellStates) {
+            return undefined;
+        }
+
+        return cellStates[id];
     }
 
     public clearState() {
