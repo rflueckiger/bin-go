@@ -74,6 +74,12 @@ export class BinGoTaskCell extends LitElement {
             
             position: relative;
             overflow: hidden;
+            
+            transition: transform 0.1s ease-in;
+        }
+        
+        .cell:not(.marked):hover {
+            transform: scale(1.05);
         }
 
         .label {
