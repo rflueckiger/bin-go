@@ -1,4 +1,8 @@
-import {BinGoCellState, BinGoConfig, BinGoState} from "./storage.ts";
+import {BinGoConfig} from "./storage.ts";
+import {BinGoState} from "./domain/bin-go-state.ts";
+import {TaskCellState} from "./domain/task-cell-state.ts";
+import {RewardCellState} from "./domain/reward-cell-state.ts";
+import {Item} from "./domain/item.ts";
 
 export class BinGoStateBuilder {
 
@@ -9,24 +13,13 @@ export class BinGoStateBuilder {
     }
 
     public createState(): BinGoState {
-        const tasksCellStates = this.config.tasks.map((task, index) => {
-            return {
-                type: 'task',
-                id: index,
-                name: task,
-                marked: false
-            } as BinGoCellState
+        const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task, task))
+        const rewardCellStates: RewardCellState[] = this.config.rewards.map((reward, index) => {
+            // TODO: handle different reward types, like coins etc. as soon as available from config
+            return new RewardCellState(index, new Item(reward, reward))
         })
-        this.shuffle(tasksCellStates)
 
-        const rewardCellStates = this.config.rewards.map((reward, index) => {
-            return {
-                type: 'reward',
-                id: index,
-                name: reward,
-                marked: false
-            } as BinGoCellState
-        })
+        this.shuffle(tasksCellStates)
         this.shuffle(rewardCellStates)
 
         return {

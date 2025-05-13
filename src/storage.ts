@@ -1,21 +1,26 @@
+import {BinGoState} from "./domain/bin-go-state.ts";
+import {CellState} from "./domain/cell-state.ts";
+
 export interface BinGoConfig {
     version: number;
     tasks: string[];
     rewards: string[];
 }
 
-export interface BinGoState {
-    version: number;
-    createdAt: number; // e.g. Date.now()
-    tasks: BinGoCellState[], // order: 00, 01, 02, 10, 11, 12, 20, 21, 22
-    rewards: BinGoCellState[], // order: 03, 13, 23, 30, 31, 32
+export interface BinGoTask {
+    key: string;
+    label: string;
 }
 
-export interface BinGoCellState {
-    type: 'task' | 'reward',
-    id: number,
-    name: string,
-    marked: boolean
+export interface BinGoRewardItem {
+    key: string;
+    label: string;
+    partsToAWhole: number;
+}
+
+export interface BinGoRewardCoins {
+    min: number;
+    max: number;
 }
 
 export class Storage {
@@ -87,7 +92,7 @@ export class Storage {
         localStorage.setItem('state', JSON.stringify(state));
     }
 
-    public updateCellState(cellState: BinGoCellState) {
+    public updateCellState(cellState: CellState) {
         console.log(`Updating state of cell (${cellState.id}) ...`)
         const state = this.getState();
         if (!state) {
@@ -103,7 +108,7 @@ export class Storage {
         this.updateState(state);
     }
 
-    private static findCellState(state: BinGoState, type: 'task' | 'reward', id: number): BinGoCellState | undefined {
+    private static findCellState(state: BinGoState, type: 'task' | 'reward', id: number): CellState | undefined {
         let cellStates
         if (type === 'task') { cellStates = state.tasks }
         if (type === 'reward') { cellStates = state.rewards }

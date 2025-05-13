@@ -1,10 +1,15 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {BinGoCellState, BinGoState, Storage} from "../storage.ts";
+import {Storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
 import '../component/bin-go-task-cell.ts'
+import {BinGoState} from "../domain/bin-go-state.ts";
+import {CellState} from "../domain/cell-state.ts";
+import {TaskCellState} from "../domain/task-cell-state.ts";
+import {RewardCellState} from "../domain/reward-cell-state.ts";
+import {Item} from "../domain/item.ts";
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -65,7 +70,7 @@ export class BinGoPlayPage extends LitElement {
         }
         const state = this.state;
 
-        const cellStates: BinGoCellState[] = []
+        const cellStates: CellState[] = []
         cellStates.push(...[0, 1, 2].map(i => state.tasks[i]))
         cellStates.push(this.state.rewards[0])
         cellStates.push(...[3, 4, 5].map(i => state.tasks[i]))
@@ -80,13 +85,16 @@ export class BinGoPlayPage extends LitElement {
         `
     }
 
-    private renderCell(cellState: BinGoCellState) {
+    private renderCell(cellState: CellState) {
         if (cellState.type === 'task') {
-            return html`<bin-go-task-cell .cellState="${cellState}" @marked="${this.marked}" ></bin-go-task-cell>`
+            const taskCellState = cellState as TaskCellState
+            return html`<bin-go-task-cell .cellState="${taskCellState}" @marked="${this.marked}" ></bin-go-task-cell>`
         } else if (cellState.type === 'reward') {
+            const rewardCellState = cellState as RewardCellState
+            // TODO: properly handle coins/items -> extract to separate component class: bin-go-reward-cell
             return html`
-                <div class="cell reward ${cellState.marked ? 'marked' : ''}">
-                    <div class="label">${cellState.name}</div>
+                <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
+                    <div class="label">${(rewardCellState.reward as Item).label}</div>
                 </div>`
         }
         return nothing

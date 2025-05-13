@@ -1,12 +1,13 @@
 import {LitElement, css, html} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {BinGoCellState, Storage} from "../storage.ts";
+import {Storage} from "../storage.ts";
+import {TaskCellState} from "../domain/task-cell-state.ts";
 
 @customElement('bin-go-task-cell')
 export class BinGoTaskCell extends LitElement {
 
     @property()
-    public cellState?: BinGoCellState;
+    public cellState?: TaskCellState;
 
     private readonly storage = new Storage()
 
@@ -40,7 +41,7 @@ export class BinGoTaskCell extends LitElement {
                  @mouseleave="${this.cancelHold}"
             >
                 <div class="circle"></div>
-                <div class="label">${this.cellState?.name}</div>
+                <div class="label">${this.cellState?.label}</div>
             </div>
         `
     }
