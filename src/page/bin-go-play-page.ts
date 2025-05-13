@@ -92,6 +92,7 @@ export class BinGoPlayPage extends LitElement {
         } else if (cellState.type === 'reward') {
             const rewardCellState = cellState as RewardCellState
             // TODO: properly handle coins/items -> extract to separate component class: bin-go-reward-cell
+            // TODO: handle hidden rewards -> visualize with question mark of something like this
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
                     <div class="label">${(rewardCellState.reward as Item).label}</div>
