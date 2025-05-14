@@ -48,10 +48,11 @@ export class BinGoApp extends LitElement {
 
     static styles = css`
         :host {
-            max-width: 1280px;
+            max-width: 640px;
             margin: 0 auto;
             padding: 2rem;
             text-align: center;
+            width: 100%;
         }  `
 }
 
