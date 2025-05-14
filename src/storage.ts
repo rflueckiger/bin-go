@@ -3,8 +3,8 @@ import {CellState} from "./domain/cell-state.ts";
 
 export interface BinGoConfig {
     version: number;
-    tasks: string[];
-    rewards: string[];
+    tasks: BinGoTask[];
+    rewards: BinGoReward[];
 }
 
 export interface BinGoTask {
@@ -12,15 +12,13 @@ export interface BinGoTask {
     label: string;
 }
 
-export interface BinGoRewardItem {
-    key: string;
-    label: string;
-    partsToAWhole: number;
-}
-
-export interface BinGoRewardCoins {
-    min: number;
-    max: number;
+export interface BinGoReward {
+    type: string;   // i.e. 'item', 'coins' -- identifies the technical type
+    key: string;    // the identifier of the reward, same key means the items can be combined, i.e. the name of an item like "cake"
+    label: string;  // the label of this reward, displayed to the user instead of the technical key
+    partsToAWhole: number;  // whether multiple of these must be collected to generate a whole
+    min: number;    // the min amount gained per reward
+    max: number;    // the max amount gained per reward (the actual value will be random)
 }
 
 export class Storage {

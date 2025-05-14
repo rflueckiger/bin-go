@@ -1,14 +1,31 @@
 import {LitElement, css, html} from 'lit'
 import {customElement} from 'lit/decorators.js'
-import {Storage} from "../storage.ts";
+import {BinGoReward, BinGoTask, Storage} from "../storage.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
 
     private version = 1;
 
-    private readonly taskItems: string[] = ['', '', '', '', '', '', '', '', '']
-    private readonly rewardItems: string[] = ['', '', '', '', '', '']
+    private readonly taskItems: BinGoTask[] = [
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' },
+        { key: '', label: '' }
+    ]
+    private readonly rewardItems: BinGoReward[] = [
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 },
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 },
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 },
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 },
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 },
+        { key: '', label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1 }
+    ]
 
     private storage = new Storage()
 
@@ -28,11 +45,11 @@ export class BinGoEditPage extends LitElement {
 
             <h3>Define 9 Tasks</h3>
             <div class="list">
-                ${this.taskItems.map((name: string, index: number) => {
+                ${this.taskItems.map((task: BinGoTask, index: number) => {
                     return html`
                         <div class="list-item task-item">
                             <span>${index + 1}.</span>
-                            <input class="task-name" data-index="${index}" .value=${name}
+                            <input class="task-name" data-index="${index}" .value=${task.label}
                                    @input=${this.inputHandler(this.taskItems)}/>
                         </div>`;
                 })}
@@ -40,11 +57,11 @@ export class BinGoEditPage extends LitElement {
 
             <h3>Define 6 Rewards</h3>
             <div class="list">
-                ${this.rewardItems.map((name: string, index: number) => {
+                ${this.rewardItems.map((reward: BinGoReward, index: number) => {
                     return html`
                         <div class="list-item reward-item">
                             <span>${index + 1}.</span>
-                            <input class="reward-name" data-index="${index}" .value=${name}
+                            <input class="reward-name" data-index="${index}" .value=${reward.label}
                                    @input=${this.inputHandler(this.rewardItems)}/>
                         </div>`;
                 })}
@@ -56,11 +73,11 @@ export class BinGoEditPage extends LitElement {
         `
     }
 
-    private inputHandler(collection: string[]): ((event: Event) => void) {
+    private inputHandler(collection: (BinGoTask | BinGoReward)[]): ((event: Event) => void) {
         return (event: Event) => {
             const target = event.target as HTMLInputElement;
             const index = Number(target.dataset.index);
-            collection[index] = target.value;
+            collection[index].label = target.value;
             this.requestUpdate();
         }
     }

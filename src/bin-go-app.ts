@@ -26,7 +26,6 @@ export class BinGoApp extends LitElement {
     }
 
     render() {
-        // TODO: allow uncheck of cells (error correction) - revert reward collection!
         // TODO: add hobby investment coins (editor option, reward generation on state creation)
         // TODO: allow spending of hobby coins
         // TODO: remember collected rewards in storage (inventory)
