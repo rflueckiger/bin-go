@@ -68,6 +68,11 @@ export class BinGoPlayPage extends LitElement {
         if (!this.state) {
             return nothing
         }
+
+        if (!this.state.rewards || this.state.rewards.length !== 6) {
+            return html`Rewards not properly generated!`
+        }
+
         const state = this.state;
 
         const cellStates: CellState[] = []

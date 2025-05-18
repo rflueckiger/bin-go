@@ -15,6 +15,10 @@ export class BinGoStateBuilder {
 
     public createState(): BinGoState {
         const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task.key, task.label))
+        // TODO: new logic: there are no longer strictly 6 rewards, but potentially, fewer or more of various kinds
+        // TODO: choose rewards (based on probability for all 6 slots) - mark them as hidden
+        // TODO: mark the ones containing an  rare or epic piece - so "sparkles" can be shown
+        // TODO: allow for more than 1 reward within one box
         const rewardCellStates: RewardCellState[] = this.config.rewards.map((reward, index) => {
             switch (reward.type) {
                 case 'coins': {
