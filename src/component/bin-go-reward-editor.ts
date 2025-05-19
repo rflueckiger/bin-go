@@ -24,16 +24,16 @@ export class BinGoRewardEditor extends LitElement {
             return html`
                 <div class="container">
                     <div class="fields-editable">
-                        <input class="reward-name" .value=${reward.label} @input=${this.inputToObjectUpdateHandler(reward, 'label')}/>
-                        <select class="reward-rarity" .value="${reward.rarity}" @input="${this.inputToObjectUpdateHandler(reward, 'rarity')}">
+                        <input class="reward-name" .value=${reward.label} @input=${this.updateStringInputHandler(reward, 'label')}/>
+                        <select class="reward-rarity" .value="${reward.rarity}" @input="${this.updateStringInputHandler(reward, 'rarity')}">
                             ${Object.keys(Rarity).map(key => {
                                 const value = Rarity[key as keyof typeof Rarity];
                                 return html`<option value="${value}" ?selected="${value === reward.rarity}">${key}</option>`  
                             })}
                         </select>
-                        <input class="reward-min field-number" .value=${reward.min} @input=${this.inputToObjectUpdateHandler(reward, 'min')}/>
-                        <input class="reward-max field-number" .value=${reward.max} @input=${this.inputToObjectUpdateHandler(reward, 'max')}/>
-                        <input class="reward-partsToAWhole field-number" .value=${reward.partsToAWhole} @input=${this.inputToObjectUpdateHandler(reward, 'partsToAWhole')}/>    
+                        <input class="reward-min field-number" .value=${reward.min} @input=${this.updateNumberInputHandler(reward, 'min')}/>
+                        <input class="reward-max field-number" .value=${reward.max} @input=${this.updateNumberInputHandler(reward, 'max')}/>
+                        <input class="reward-partsToAWhole field-number" .value=${reward.partsToAWhole} @input=${this.updateNumberInputHandler(reward, 'partsToAWhole')}/>    
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>
@@ -58,8 +58,8 @@ export class BinGoRewardEditor extends LitElement {
             return html`
                 <div class="container">
                     <div class="fields-editable">
-                        <input class="reward-min field-number" .value=${reward.min} @input=${this.inputToObjectUpdateHandler(reward, 'min')}/>
-                        <input class="reward-max field-number" .value=${reward.max} @input=${this.inputToObjectUpdateHandler(reward, 'max')}/>
+                        <input class="reward-min field-number" .value=${reward.min} @input=${this.updateNumberInputHandler(reward, 'min')}/>
+                        <input class="reward-max field-number" .value=${reward.max} @input=${this.updateNumberInputHandler(reward, 'max')}/>
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>
@@ -99,10 +99,18 @@ export class BinGoRewardEditor extends LitElement {
         return html`<span>(${min}-${max})</span>`
     }
 
-    private inputToObjectUpdateHandler(object: any, property: string): ((event: Event) => void) {
+    private updateStringInputHandler(object: any, property: string): ((event: Event) => void) {
         return (event: Event) => {
             const target = event.target as HTMLInputElement
             object[property] = target.value
+            this.requestUpdate()
+        }
+    }
+
+    private updateNumberInputHandler(object: any, property: string): ((event: Event) => void) {
+        return (event: Event) => {
+            const target = event.target as HTMLInputElement
+            object[property] = Number(target.value)
             this.requestUpdate()
         }
     }
