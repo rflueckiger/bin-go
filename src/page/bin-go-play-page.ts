@@ -9,7 +9,6 @@ import {BinGoState} from "../domain/bin-go-state.ts";
 import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
-import {Item} from "../domain/item.ts";
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {

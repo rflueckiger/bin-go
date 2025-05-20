@@ -2,8 +2,6 @@ import {BinGoConfig} from "./storage.ts";
 import {BinGoState} from "./domain/bin-go-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
-import {Item} from "./domain/item.ts";
-import {Coins} from "./domain/coins.ts";
 
 export class BinGoStateBuilder {
 
@@ -15,24 +13,34 @@ export class BinGoStateBuilder {
 
     public createState(): BinGoState {
         const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task.key, task.label))
-        // TODO: new logic: there are no longer strictly 6 rewards, but potentially, fewer or more of various kinds
-        // TODO: choose rewards (based on probability for all 6 slots) - mark them as hidden
-        // TODO: mark the ones containing an  rare or epic piece - so "sparkles" can be shown
-        // TODO: allow for more than 1 reward within one box
+
+        // create 6 RewardCellStates and for each create rewards
+        const rewardCellStates: RewardCellState[] = []
+        // const rewardBuilder = new RewardBuilder(this.config.rewards);
+        for (let i = 0; i < 6; i++) {
+            //   1. roll for rarity, then pick 1 item from that type randomly from the config
+            //      - choose lesser rarity if higher not available
+            //   2. if epic/rare inside this loot box is doen, mark loot box as "sparkly"
+            //      - roll amount (using randomGaussianInt) if min/max differ, otherwise take min/max as amount
+            //   3. roll for chance to have additional item, if so, go back to 1.
+
+            const rewards: (Coins | Item)[] = rewardBuilder.getRewards();
+
+            rewardCellStates.push(new RewardCellState(i, rewards))
+        }
+
+        // TODO: old code - remove when code above is done
         const rewardCellStates: RewardCellState[] = this.config.rewards.map((reward, index) => {
             switch (reward.type) {
                 case 'coins': {
                     const amount = this.randomGaussianInt(reward.min, reward.max);
-                    // TODO: do calculation and produce random coin amount between min/max, using gauss distribution
                     return new RewardCellState(index, new Coins(amount))
                 }
                 case 'item': {
-                    // TODO: handle min/max/partsToAWhole, etc.
                     return new RewardCellState(index, new Item(reward.key, reward.label))
                 }
                 default: throw Error('Unknown reward type');
             }
-            // TODO: 50% of the rewards should be "hidden" -> mark them as such
         })
 
         this.shuffle(tasksCellStates)
@@ -44,6 +52,10 @@ export class BinGoStateBuilder {
             tasks: tasksCellStates,
             rewards: rewardCellStates
         }
+    }
+
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     // chatgpt

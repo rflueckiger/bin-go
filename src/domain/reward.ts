@@ -1,4 +1,4 @@
-export class Item {
+export class Reward {
     public readonly key: string;
     public readonly label: string;
     public amount: number = 1;

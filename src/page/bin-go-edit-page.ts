@@ -1,6 +1,6 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {BinGoReward, BinGoTask, Rarity, Storage} from "../storage.ts";
+import {BinGoRewardSpec, BinGoTask, Rarity, Storage} from "../storage.ts";
 import '../component/bin-go-reward-editor.ts';
 import ShortUniqueId from 'short-unique-id';
 
@@ -23,10 +23,10 @@ export class BinGoEditPage extends LitElement {
         { key: `${this.uid.rnd()}`, label: ''}
     ]
 
-    private readonly rewards: BinGoReward[] = []
+    private readonly rewardSpecs: BinGoRewardSpec[] = []
 
     @state()
-    private editing?: BinGoTask | BinGoReward = undefined
+    private editing?: BinGoTask | BinGoRewardSpec = undefined
 
     private storage = new Storage()
 
@@ -36,7 +36,7 @@ export class BinGoEditPage extends LitElement {
         const config = this.storage.getConfig();
         if (config) {
             this.tasks = config.tasks;
-            this.rewards = config.rewards;
+            this.rewardSpecs = config.rewardSpecs;
         }
     }
 
@@ -51,17 +51,17 @@ export class BinGoEditPage extends LitElement {
 
             <h3>Define Rewards</h3>
             <div class="list">
-                ${this.rewards.map(reward => {
+                ${this.rewardSpecs.map(rewardSpec => {
                     return html`
                         <div class="list-item reward-item">
-                            <bin-go-reward-editor .reward="${reward}" .editing="${this.editing === reward}" @done="${(event: CustomEvent) => {
+                            <bin-go-reward-editor .rewardSpec="${rewardSpec}" .editing="${this.editing === rewardSpec}" @done="${(event: CustomEvent) => {
                                     event.stopPropagation()
                                     this.editing = undefined          
                                 }}"></bin-go-reward-editor>
                             ${!this.editing ? html`
-                                <a href="#" @click="${() => this.editing = reward}">Edit</a>
+                                <a href="#" @click="${() => this.editing = rewardSpec}">Edit</a>
                                 <a href="#" @click="${() => {
-                                        this.rewards.splice(this.rewards.indexOf(reward), 1)
+                                        this.rewardSpecs.splice(this.rewardSpecs.indexOf(rewardSpec), 1)
                                         this.requestUpdate()
                                     }}">Remove</a>
                             ` : nothing}
@@ -72,13 +72,13 @@ export class BinGoEditPage extends LitElement {
                     <span>Add:</span>
                     <a href="#" @click="${() => {
                         const newEmptyReward = { key: `${this.uid.rnd()}`, label: '', type: 'item', min: 1, max: 1, partsToAWhole: 1, rarity: Rarity.Common }
-                        this.rewards.push(newEmptyReward)
+                        this.rewardSpecs.push(newEmptyReward)
                         this.editing = newEmptyReward
                         this.requestUpdate()
                     }}">Item</a>
                     <a href="#" @click="${() => {
                         const newEmptyReward = { key: `${this.uid.rnd()}`, label: '', type: 'coins', min: 3, max: 8, partsToAWhole: 1, rarity: Rarity.Common }
-                        this.rewards.push(newEmptyReward)
+                        this.rewardSpecs.push(newEmptyReward)
                         this.editing = newEmptyReward
                         this.requestUpdate()
                     }}">Coins</a>
@@ -111,7 +111,7 @@ export class BinGoEditPage extends LitElement {
         this.storage.updateConfig({
             version: this.version,
             tasks: this.tasks,
-            rewards: this.rewards,
+            rewardSpecs: this.rewardSpecs,
         })
         this.storage.clearState()
         this.sendDone();

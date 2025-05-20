@@ -11,7 +11,7 @@ export enum Rarity {
 export interface BinGoConfig {
     version: number;
     tasks: BinGoTask[];
-    rewards: BinGoReward[];
+    rewardSpecs: BinGoRewardSpec[];
 }
 
 export interface BinGoTask {
@@ -19,7 +19,7 @@ export interface BinGoTask {
     label: string;
 }
 
-export interface BinGoReward {
+export interface BinGoRewardSpec {
     type: string;       // i.e. 'item', 'coins' -- identifies the technical type
     key: string;        // the identifier of the reward, same key means the items can be combined, i.e. the name of an item like "cake"
     label: string;      // the label of this reward, displayed to the user instead of the technical key

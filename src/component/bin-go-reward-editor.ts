@@ -1,39 +1,39 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {BinGoReward, Rarity} from "../storage.ts";
+import {BinGoRewardSpec, Rarity} from "../storage.ts";
 
 @customElement('bin-go-reward-editor')
 export class BinGoRewardEditor extends LitElement {
 
     @property()
-    public reward?: BinGoReward;
+    public rewardSpec?: BinGoRewardSpec;
 
     @property()
     public editing = false;
 
     render() {
-        switch (this.reward?.type) {
-            case 'item': return this.handleRewardTypeItem(this.reward)
-            case 'coins': return this.handleRewardTypeCoins(this.reward)
+        switch (this.rewardSpec?.type) {
+            case 'item': return this.handleRewardTypeItem(this.rewardSpec)
+            case 'coins': return this.handleRewardTypeCoins(this.rewardSpec)
             default: throw Error('Unknown reward type')
         }
     }
 
-    private handleRewardTypeItem(reward: BinGoReward) {
+    private handleRewardTypeItem(rewardSpec: BinGoRewardSpec) {
         if (this.editing) {
             return html`
                 <div class="container">
                     <div class="fields-editable">
-                        <input class="reward-name" .value=${reward.label} @input=${this.updateStringInputHandler(reward, 'label')}/>
-                        <select class="reward-rarity" .value="${reward.rarity}" @input="${this.updateStringInputHandler(reward, 'rarity')}">
+                        <input class="reward-name" .value=${rewardSpec.label} @input=${this.updateStringInputHandler(rewardSpec, 'label')}/>
+                        <select class="reward-rarity" .value="${rewardSpec.rarity}" @input="${this.updateStringInputHandler(rewardSpec, 'rarity')}">
                             ${Object.keys(Rarity).map(key => {
                                 const value = Rarity[key as keyof typeof Rarity];
-                                return html`<option value="${value}" ?selected="${value === reward.rarity}">${key}</option>`  
+                                return html`<option value="${value}" ?selected="${value === rewardSpec.rarity}">${key}</option>`  
                             })}
                         </select>
-                        <input class="reward-min field-number" .value=${reward.min} @input=${this.updateNumberInputHandler(reward, 'min')}/>
-                        <input class="reward-max field-number" .value=${reward.max} @input=${this.updateNumberInputHandler(reward, 'max')}/>
-                        <input class="reward-partsToAWhole field-number" .value=${reward.partsToAWhole} @input=${this.updateNumberInputHandler(reward, 'partsToAWhole')}/>    
+                        <input class="reward-min field-number" .value=${rewardSpec.min} @input=${this.updateNumberInputHandler(rewardSpec, 'min')}/>
+                        <input class="reward-max field-number" .value=${rewardSpec.max} @input=${this.updateNumberInputHandler(rewardSpec, 'max')}/>
+                        <input class="reward-partsToAWhole field-number" .value=${rewardSpec.partsToAWhole} @input=${this.updateNumberInputHandler(rewardSpec, 'partsToAWhole')}/>    
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>
@@ -42,24 +42,24 @@ export class BinGoRewardEditor extends LitElement {
             `;
         }
         return html`
-            <div class="container ${reward.rarity}">
+            <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${reward.type.toUpperCase()}</span>
-                    <span>${reward.label}</span>
-                    <span>${this.renderAmountRange(reward.min, reward.max)}</span>
-                    <span>${reward.partsToAWhole !== 1 ? html`<span>Collect: ${reward.partsToAWhole}</span>` : nothing}</span>
+                    <span>${rewardSpec.type.toUpperCase()}</span>
+                    <span>${rewardSpec.label}</span>
+                    <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
+                    <span>${rewardSpec.partsToAWhole !== 1 ? html`<span>Collect: ${rewardSpec.partsToAWhole}</span>` : nothing}</span>
                 </div>
             </div>
         `
     }
 
-    private handleRewardTypeCoins(reward: BinGoReward) {
+    private handleRewardTypeCoins(rewardSpec: BinGoRewardSpec) {
         if (this.editing) {
             return html`
                 <div class="container">
                     <div class="fields-editable">
-                        <input class="reward-min field-number" .value=${reward.min} @input=${this.updateNumberInputHandler(reward, 'min')}/>
-                        <input class="reward-max field-number" .value=${reward.max} @input=${this.updateNumberInputHandler(reward, 'max')}/>
+                        <input class="reward-min field-number" .value=${rewardSpec.min} @input=${this.updateNumberInputHandler(rewardSpec, 'min')}/>
+                        <input class="reward-max field-number" .value=${rewardSpec.max} @input=${this.updateNumberInputHandler(rewardSpec, 'max')}/>
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>
@@ -68,10 +68,10 @@ export class BinGoRewardEditor extends LitElement {
             `;
         }
         return html`
-            <div class="container ${reward.rarity}">
+            <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${reward.type.toUpperCase()}</span>
-                    <span>${this.renderAmountRange(reward.min, reward.max)}</span>
+                    <span>${rewardSpec.type.toUpperCase()}</span>
+                    <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
                 </div>
             </div>
         `
