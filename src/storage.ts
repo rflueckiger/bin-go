@@ -59,12 +59,7 @@ export class Storage {
     }
 
     public updateConfig(config: BinGoConfig) {
-        console.log('Validating updated config...')
-        console.log(config);
-
         // TODO: validate / sanitize input
-
-        console.log('Updating config...')
         localStorage.setItem('config', JSON.stringify(config));
     }
 
@@ -89,12 +84,7 @@ export class Storage {
     }
 
     public updateState(state: BinGoState) {
-        console.log('Validating updated state...')
-        console.log(state);
-
         // TODO: validate / sanitize input
-
-        console.log('Updating state...')
         localStorage.setItem('state', JSON.stringify(state));
     }
 

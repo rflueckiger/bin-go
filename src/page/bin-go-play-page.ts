@@ -1,6 +1,6 @@
-import {LitElement, css, html, nothing} from 'lit'
+import {css, html, LitElement, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {Storage} from "../storage.ts";
+import {Rarity, Storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
@@ -95,14 +95,17 @@ export class BinGoPlayPage extends LitElement {
             return html`<bin-go-task-cell .cellState="${taskCellState}" @marked="${this.marked}" ></bin-go-task-cell>`
         } else if (cellState.type === 'reward') {
             const rewardCellState = cellState as RewardCellState
-            // TODO: properly handle coins/items -> extract to separate component class: bin-go-reward-cell
-            // TODO: handle hidden rewards -> visualize with question mark of something like this
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    <div class="label">${(rewardCellState.reward as Item).label}</div>
+                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '???' : '?'}</div>` : nothing }
                 </div>`
         }
         return nothing
+    }
+
+    private isSpecialRewardCell(rewardCellState: RewardCellState): boolean {
+        return rewardCellState.rewards.length > 2
+            || rewardCellState.rewards.filter(reward => reward.rarity === Rarity.Epic || reward.rarity === Rarity.Rare).length > 0
     }
 
     private marked() {
@@ -113,17 +116,31 @@ export class BinGoPlayPage extends LitElement {
         const state = this.state;
 
         // line 1/2/3
-        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[0].marked = true);
-        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[1].marked = true);
-        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[2].marked = true);
+        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[0]));
+        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[1]));
+        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[2]));
 
         // column 1/2/3
-        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[3].marked = true);
-        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[4].marked = true);
-        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.state.rewards[5].marked = true);
+        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[3]));
+        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[4]));
+        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[5]));
 
         this.storage.updateState(this.state)
         this.requestUpdate()
+    }
+
+    private collectRewards(rewardCellState: RewardCellState) {
+        if (rewardCellState.marked) {
+            return
+        }
+
+        rewardCellState.marked = true
+
+        // TODO: collect rewards in inventory
+        console.log('Collecting rewards:')
+        rewardCellState.rewards.forEach(reward => {
+            console.log(`- ${JSON.stringify(reward)}`)
+        })
     }
 
     private sendEdit() {

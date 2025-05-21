@@ -1,7 +1,8 @@
-import {BinGoConfig} from "./storage.ts";
+import {BinGoConfig, BinGoRewardSpec, Rarity} from "./storage.ts";
 import {BinGoState} from "./domain/bin-go-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
+import {Reward} from "./domain/reward.ts";
 
 export class BinGoStateBuilder {
 
@@ -16,32 +17,11 @@ export class BinGoStateBuilder {
 
         // create 6 RewardCellStates and for each create rewards
         const rewardCellStates: RewardCellState[] = []
-        // const rewardBuilder = new RewardBuilder(this.config.rewards);
         for (let i = 0; i < 6; i++) {
-            //   1. roll for rarity, then pick 1 item from that type randomly from the config
-            //      - choose lesser rarity if higher not available
-            //   2. if epic/rare inside this loot box is doen, mark loot box as "sparkly"
-            //      - roll amount (using randomGaussianInt) if min/max differ, otherwise take min/max as amount
-            //   3. roll for chance to have additional item, if so, go back to 1.
-
-            const rewards: (Coins | Item)[] = rewardBuilder.getRewards();
-
+            const rewards: Reward[] = [];
+            this.generateRewards(rewards)
             rewardCellStates.push(new RewardCellState(i, rewards))
         }
-
-        // TODO: old code - remove when code above is done
-        const rewardCellStates: RewardCellState[] = this.config.rewards.map((reward, index) => {
-            switch (reward.type) {
-                case 'coins': {
-                    const amount = this.randomGaussianInt(reward.min, reward.max);
-                    return new RewardCellState(index, new Coins(amount))
-                }
-                case 'item': {
-                    return new RewardCellState(index, new Item(reward.key, reward.label))
-                }
-                default: throw Error('Unknown reward type');
-            }
-        })
 
         this.shuffle(tasksCellStates)
         this.shuffle(rewardCellStates)
@@ -52,6 +32,81 @@ export class BinGoStateBuilder {
             tasks: tasksCellStates,
             rewards: rewardCellStates
         }
+    }
+
+    private generateRewards(rewards: Reward[], maxRolls = 3, roll = 1) {
+        //   1. roll for rarity, then pick 1 item from that type randomly from the config
+        //   2. if epic/rare inside this loot box is done
+        //   3. otherwise repeat for a maximum of 3 times total
+
+        const rarity = this.getRarity();
+        const reward = this.getRandomReward(this.config.rewardSpecs, rarity);
+
+        if (reward) {
+            rewards.push(reward)
+
+            // max tries reached?
+            if (roll >= maxRolls) {
+                return
+            }
+
+            // maybe one more reward?
+            if ((reward.rarity === Rarity.Uncommon || reward.rarity === Rarity.Common)
+                && this.randomInt(0, 5) < 2) { // one more item in 2/5 of cases
+
+                this.generateRewards(rewards, maxRolls, roll + 1)
+            }
+        }
+    }
+
+    private getRandomReward(rewardSpecs: BinGoRewardSpec[], rarity: Rarity): Reward | null {
+        const matchingRewardSpecs = rewardSpecs.filter(spec => spec.rarity === rarity)
+        if (matchingRewardSpecs.length > 0) {
+            const randomIndex = this.randomInt(0, matchingRewardSpecs.length - 1)
+            return this.createReward(matchingRewardSpecs[randomIndex])
+        }
+
+        const lowerRarity = this.getNextLowerRarity(rarity)
+        if (lowerRarity) {
+            return this.getRandomReward(rewardSpecs, lowerRarity)
+        }
+
+        return null
+    }
+
+    private createReward(rewardSpec: BinGoRewardSpec): Reward {
+        switch (rewardSpec.type) {
+            default: return {
+                type: rewardSpec.type,
+                key: rewardSpec.key,
+                label: rewardSpec.label,
+                rarity: rewardSpec.rarity,
+                amount: this.getGaussianAmount(rewardSpec),
+                partsToAWhole: rewardSpec.partsToAWhole
+            }
+        }
+    }
+
+    private getGaussianAmount(rewardSpec: BinGoRewardSpec): number {
+        if (rewardSpec.min !== rewardSpec.max) {
+            return this.randomGaussianInt(rewardSpec.min, rewardSpec.max)
+        }
+        return rewardSpec.min
+    }
+
+    private getNextLowerRarity(rarity: Rarity): Rarity | undefined {
+        if (rarity === Rarity.Epic) { return Rarity.Rare }
+        else if (rarity === Rarity.Rare) { return Rarity.Uncommon }
+        else if (rarity === Rarity.Uncommon) { return Rarity.Common }
+        else return undefined
+    }
+
+    private getRarity(): Rarity {
+        const roll = this.randomInt(0, 999);
+        if (roll < 8) { return Rarity.Epic }
+        else if (roll < 88) { return Rarity.Rare }
+        else if (roll < 338) { return Rarity.Uncommon }
+        else return Rarity.Common
     }
 
     private randomInt(min: number, max: number): number {

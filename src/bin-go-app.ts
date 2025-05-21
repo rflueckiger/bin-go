@@ -26,12 +26,6 @@ export class BinGoApp extends LitElement {
     }
 
     render() {
-        // TODO: add hobby investment coins (editor option, reward generation on state creation)
-        // TODO: allow spending of hobby coins
-        // TODO: remember collected rewards in storage (inventory)
-        // TODO: deploy on github
-        // TODO: pwa support
-
         return html`
             ${this.editMode ? html`
                 <bin-go-edit-page @done="${this.handleDoneEditing}"></bin-go-edit-page>` : html`

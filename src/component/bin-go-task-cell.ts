@@ -18,7 +18,6 @@ export class BinGoTaskCell extends LitElement {
         this.shadowRoot!.querySelector('.circle')?.classList.add('marking')
 
         this.timer = setTimeout(() => {
-            console.log('Held for 3.5 seconds!');
             this.shadowRoot!.querySelector('.circle')?.classList.remove('marking')
             // Add your final action here
             this.mark()

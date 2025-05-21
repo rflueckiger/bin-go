@@ -1,11 +1,10 @@
-export class Reward {
-    public readonly key: string;
-    public readonly label: string;
-    public amount: number = 1;
-    public partsToAWhole: number = 1;
+import {Rarity} from "../storage.ts";
 
-    constructor(key: string, label: string) {
-        this.key = key;
-        this.label = label;
-    }
+export interface Reward {
+    type: string
+    key: string
+    label: string
+    rarity: Rarity
+    amount: number
+    partsToAWhole: number
 }
