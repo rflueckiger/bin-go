@@ -9,6 +9,7 @@ import {BinGoState} from "../domain/bin-go-state.ts";
 import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
+import '../component/bin-go-inventory.ts';
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -55,11 +56,13 @@ export class BinGoPlayPage extends LitElement {
 
     render() {
         return html`
-            <h1>Play Mode</h1>
-            ${this.renderBoard()}
+            <h1>BinGo!</h1>
             <div class="action-bar">
                 <a class="link" href="#" @click="${this.sendEdit}">Edit</a>
             </div>
+            ${this.renderBoard()}
+            <h1>Inventory</h1>
+            <bin-go-inventory></bin-go-inventory>
         `
     }
 
@@ -133,14 +136,9 @@ export class BinGoPlayPage extends LitElement {
         if (rewardCellState.marked) {
             return
         }
-
         rewardCellState.marked = true
-
-        // TODO: collect rewards in inventory
-        console.log('Collecting rewards:')
-        rewardCellState.rewards.forEach(reward => {
-            console.log(`- ${JSON.stringify(reward)}`)
-        })
+        this.storage.updateInventory(rewardCellState.rewards)
+        this.requestUpdate()
     }
 
     private sendEdit() {
@@ -183,7 +181,7 @@ export class BinGoPlayPage extends LitElement {
             }
             
             .action-bar {
-                margin-top: 1.5rem;
+                margin-bottom: 1.5rem;
             }
             
             .link {

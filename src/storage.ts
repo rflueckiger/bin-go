@@ -1,5 +1,6 @@
 import {BinGoState} from "./domain/bin-go-state.ts";
 import {CellState} from "./domain/cell-state.ts";
+import {Reward} from "./domain/reward.ts";
 
 export enum Rarity {
     Common = 'common',
@@ -27,6 +28,11 @@ export interface BinGoRewardSpec {
     min: number;        // the min amount gained per reward
     max: number;        // the max amount gained per reward (the actual value will be random)
     rarity: Rarity ;    // the rarity of the item
+}
+
+export interface BinGoInventory {
+    items: Reward[]
+    coins: number
 }
 
 export class Storage {
@@ -102,6 +108,37 @@ export class Storage {
 
         existingCellState.marked = cellState.marked
         this.updateState(state);
+    }
+
+    public updateInventory(rewards: Reward[]) {
+        // TODO: show collected rewards to user
+
+        console.log('Collecting rewards:')
+        rewards.forEach(reward => { console.log(`- ${JSON.stringify(reward)}`) })
+
+        const strInventory = localStorage.getItem('inventory');
+        let inventory: BinGoInventory
+        if (strInventory) {
+            inventory = JSON.parse(strInventory)
+        } else {
+            inventory = {
+                coins: 0,
+                items: []
+            }
+        }
+
+        rewards.forEach(reward => {
+            if (reward.type === 'coins') {
+                inventory.coins += reward.amount
+            } else {
+                // TODO: do merging of items with same key and update specs (label, rarity, etc.)
+                inventory.items.push(reward)
+            }
+        })
+
+        // TODO: do item merging here to also handle past merging mistakes...
+
+        localStorage.setItem('inventory', JSON.stringify(inventory));
     }
 
     private static findCellState(state: BinGoState, type: 'task' | 'reward', id: number): CellState | undefined {
