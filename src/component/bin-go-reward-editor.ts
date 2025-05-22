@@ -1,12 +1,12 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {BinGoRewardSpec, Rarity} from "../storage.ts";
+import {RewardSpec, Rarity} from "../storage.ts";
 
 @customElement('bin-go-reward-editor')
 export class BinGoRewardEditor extends LitElement {
 
     @property()
-    public rewardSpec?: BinGoRewardSpec;
+    public rewardSpec?: RewardSpec;
 
     @property()
     public editing = false;
@@ -19,7 +19,7 @@ export class BinGoRewardEditor extends LitElement {
         }
     }
 
-    private handleRewardTypeItem(rewardSpec: BinGoRewardSpec) {
+    private handleRewardTypeItem(rewardSpec: RewardSpec) {
         if (this.editing) {
             return html`
                 <div class="container">
@@ -53,7 +53,7 @@ export class BinGoRewardEditor extends LitElement {
         `
     }
 
-    private handleRewardTypeCoins(rewardSpec: BinGoRewardSpec) {
+    private handleRewardTypeCoins(rewardSpec: RewardSpec) {
         if (this.editing) {
             return html`
                 <div class="container">

@@ -1,6 +1,6 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {BinGoRewardSpec, BinGoTask, Rarity, Storage} from "../storage.ts";
+import {RewardSpec, Task, Rarity, Storage} from "../storage.ts";
 import '../component/bin-go-reward-editor.ts';
 import ShortUniqueId from 'short-unique-id';
 
@@ -11,7 +11,7 @@ export class BinGoEditPage extends LitElement {
 
     private readonly uid = new ShortUniqueId({ length: 6 });
 
-    private readonly tasks: BinGoTask[] = [
+    private readonly tasks: Task[] = [
         { key: `${this.uid.rnd()}`, label: ''},
         { key: `${this.uid.rnd()}`, label: ''},
         { key: `${this.uid.rnd()}`, label: ''},
@@ -23,10 +23,10 @@ export class BinGoEditPage extends LitElement {
         { key: `${this.uid.rnd()}`, label: ''}
     ]
 
-    private readonly rewardSpecs: BinGoRewardSpec[] = []
+    private readonly rewardSpecs: RewardSpec[] = []
 
     @state()
-    private editing?: BinGoTask | BinGoRewardSpec = undefined
+    private editing?: Task | RewardSpec = undefined
 
     private storage = new Storage()
 
@@ -91,7 +91,7 @@ export class BinGoEditPage extends LitElement {
         `
     }
 
-    private renderTaskRow(task: BinGoTask) {
+    private renderTaskRow(task: Task) {
         return html`
             <div class="list-item task-item">
                 <input class="task-name" .value="${task.label}" @input=${this.inputToObjectUpdateHandler(task, 'label')}/>

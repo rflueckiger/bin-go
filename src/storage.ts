@@ -1,4 +1,4 @@
-import {BinGoState} from "./domain/bin-go-state.ts";
+import {BoardState} from "./domain/board-state.ts";
 import {CellState} from "./domain/cell-state.ts";
 import {Reward} from "./domain/reward.ts";
 
@@ -9,18 +9,18 @@ export enum Rarity {
     Epic = 'epic'
 }
 
-export interface BinGoConfig {
+export interface AppConfig {
     version: number;
-    tasks: BinGoTask[];
-    rewardSpecs: BinGoRewardSpec[];
+    tasks: Task[];
+    rewardSpecs: RewardSpec[];
 }
 
-export interface BinGoTask {
+export interface Task {
     key: string;
     label: string;
 }
 
-export interface BinGoRewardSpec {
+export interface RewardSpec {
     type: string;       // i.e. 'item', 'coins' -- identifies the technical type
     key: string;        // the identifier of the reward, same key means the items can be combined, i.e. the name of an item like "cake"
     label: string;      // the label of this reward, displayed to the user instead of the technical key
@@ -30,7 +30,7 @@ export interface BinGoRewardSpec {
     rarity: Rarity ;    // the rarity of the item
 }
 
-export interface BinGoInventory {
+export interface Inventory {
     items: Reward[]
     coins: number
 }
@@ -39,7 +39,7 @@ export class Storage {
 
     public static VERSION = 1;
 
-    public getConfig(): BinGoConfig | undefined {
+    public getConfig(): AppConfig | undefined {
         console.log('Reading config...')
         const strConfig = localStorage.getItem('config');
 
@@ -64,12 +64,12 @@ export class Storage {
         return undefined;
     }
 
-    public updateConfig(config: BinGoConfig) {
+    public updateConfig(config: AppConfig) {
         // TODO: validate / sanitize input
         localStorage.setItem('config', JSON.stringify(config));
     }
 
-    public getState(): BinGoState | undefined {
+    public getState(): BoardState | undefined {
         console.log('Reading state...')
         const strState = localStorage.getItem('state');
 
@@ -89,7 +89,7 @@ export class Storage {
         return undefined;
     }
 
-    public updateState(state: BinGoState) {
+    public updateState(state: BoardState) {
         // TODO: validate / sanitize input
         localStorage.setItem('state', JSON.stringify(state));
     }
@@ -110,21 +110,31 @@ export class Storage {
         this.updateState(state);
     }
 
+    public getInventory(): Inventory {
+        console.log('Reading inventory...')
+        const strInventory = localStorage.getItem('inventory');
+
+        if (strInventory) {
+            return JSON.parse(strInventory)
+        }
+
+        const emptyInventory = {
+            coins: 0,
+            items: []
+        }
+        localStorage.setItem('inventory', JSON.stringify(emptyInventory));
+        return emptyInventory;
+    }
+
     public updateInventory(rewards: Reward[]) {
         // TODO: show collected rewards to user
 
         console.log('Collecting rewards:')
         rewards.forEach(reward => { console.log(`- ${JSON.stringify(reward)}`) })
 
-        const strInventory = localStorage.getItem('inventory');
-        let inventory: BinGoInventory
-        if (strInventory) {
-            inventory = JSON.parse(strInventory)
-        } else {
-            inventory = {
-                coins: 0,
-                items: []
-            }
+        const inventory = this.getInventory()
+        if (!inventory) {
+            throw new Error('Can not update inventory, because inventory could not be loaded.')
         }
 
         rewards.forEach(reward => {
@@ -141,7 +151,7 @@ export class Storage {
         localStorage.setItem('inventory', JSON.stringify(inventory));
     }
 
-    private static findCellState(state: BinGoState, type: 'task' | 'reward', id: number): CellState | undefined {
+    private static findCellState(state: BoardState, type: 'task' | 'reward', id: number): CellState | undefined {
         let cellStates
         if (type === 'task') { cellStates = state.tasks }
         if (type === 'reward') { cellStates = state.rewards }

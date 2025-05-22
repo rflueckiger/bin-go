@@ -1,18 +1,18 @@
-import {BinGoConfig, BinGoRewardSpec, Rarity} from "./storage.ts";
-import {BinGoState} from "./domain/bin-go-state.ts";
+import {AppConfig, RewardSpec, Rarity} from "./storage.ts";
+import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
 import {Reward} from "./domain/reward.ts";
 
 export class BinGoStateBuilder {
 
-    private readonly config: BinGoConfig;
+    private readonly config: AppConfig;
 
-    constructor(config: BinGoConfig) {
+    constructor(config: AppConfig) {
         this.config = config;
     }
 
-    public createState(): BinGoState {
+    public createState(): BoardState {
         const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task.key, task.label))
 
         // create 6 RewardCellStates and for each create rewards
@@ -59,7 +59,7 @@ export class BinGoStateBuilder {
         }
     }
 
-    private getRandomReward(rewardSpecs: BinGoRewardSpec[], rarity: Rarity): Reward | null {
+    private getRandomReward(rewardSpecs: RewardSpec[], rarity: Rarity): Reward | null {
         const matchingRewardSpecs = rewardSpecs.filter(spec => spec.rarity === rarity)
         if (matchingRewardSpecs.length > 0) {
             const randomIndex = this.randomInt(0, matchingRewardSpecs.length - 1)
@@ -74,7 +74,7 @@ export class BinGoStateBuilder {
         return null
     }
 
-    private createReward(rewardSpec: BinGoRewardSpec): Reward {
+    private createReward(rewardSpec: RewardSpec): Reward {
         switch (rewardSpec.type) {
             default: return {
                 type: rewardSpec.type,
@@ -87,7 +87,7 @@ export class BinGoStateBuilder {
         }
     }
 
-    private getGaussianAmount(rewardSpec: BinGoRewardSpec): number {
+    private getGaussianAmount(rewardSpec: RewardSpec): number {
         if (rewardSpec.min !== rewardSpec.max) {
             return this.randomGaussianInt(rewardSpec.min, rewardSpec.max)
         }

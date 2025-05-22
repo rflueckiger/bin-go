@@ -5,7 +5,7 @@ import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
 import '../component/bin-go-task-cell.ts'
-import {BinGoState} from "../domain/bin-go-state.ts";
+import {BoardState} from "../domain/board-state.ts";
 import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
@@ -17,7 +17,7 @@ export class BinGoPlayPage extends LitElement {
     private readonly storage = new Storage()
 
     @state()
-    private readonly state?: BinGoState
+    private readonly state?: BoardState
 
     constructor() {
         super();
@@ -37,8 +37,8 @@ export class BinGoPlayPage extends LitElement {
         this.state = state;
     }
 
-    private hasExpired(_state: BinGoState) {
-        const stateDate = new Date(_state.createdAt)
+    private hasExpired(state: BoardState) {
+        const stateDate = new Date(state.createdAt)
         const currentDate = new Date()
 
         const stateWeek = getISOWeek(stateDate)
