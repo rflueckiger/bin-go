@@ -39,6 +39,16 @@ export class Storage {
 
     public static VERSION = 1;
 
+    private inventoryListeners: (() => void)[] = []
+
+    public addInventoryListener(listener: () => void) {
+        this.inventoryListeners.push(listener)
+    }
+
+    public removeInventoryListener(listener: () => void) {
+        this.inventoryListeners.splice(this.inventoryListeners.indexOf(listener), 1)
+    }
+
     public getConfig(): AppConfig | undefined {
         console.log('Reading config...')
         const strConfig = localStorage.getItem('config');
@@ -149,6 +159,7 @@ export class Storage {
         // TODO: do item merging here to also handle past merging mistakes...
 
         localStorage.setItem('inventory', JSON.stringify(inventory));
+        this.inventoryListeners.forEach(listener => listener())
     }
 
     private static findCellState(state: BoardState, type: 'task' | 'reward', id: number): CellState | undefined {
