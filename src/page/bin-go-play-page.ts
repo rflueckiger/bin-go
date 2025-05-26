@@ -1,6 +1,6 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {Rarity, Storage} from "../storage.ts";
+import {Rarity, storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
@@ -14,24 +14,22 @@ import '../component/bin-go-inventory.ts';
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
 
-    private readonly storage = new Storage()
-
     @state()
     private readonly state?: BoardState
 
     constructor() {
         super();
 
-        let state = this.storage.getState()
+        let state = storage.getState()
 
         // if there is no game state or if the game state has expired, create new game state
         if (!state || this.hasExpired(state)) {
-            const config = this.storage.getConfig()
+            const config = storage.getConfig()
             if (!config) {
                 throw new Error('IllegalStateException')
             }
             state = new BinGoStateBuilder(config).createState()
-            this.storage.updateState(state)
+            storage.updateState(state)
         }
 
         this.state = state;
@@ -128,7 +126,7 @@ export class BinGoPlayPage extends LitElement {
         [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[4]));
         [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[5]));
 
-        this.storage.updateState(this.state)
+        storage.updateState(this.state)
         this.requestUpdate()
     }
 
@@ -137,7 +135,7 @@ export class BinGoPlayPage extends LitElement {
             return
         }
         rewardCellState.marked = true
-        this.storage.updateInventory(rewardCellState.rewards)
+        storage.updateInventory(rewardCellState.rewards)
         this.requestUpdate()
     }
 

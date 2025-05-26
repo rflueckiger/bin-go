@@ -1,12 +1,11 @@
 import {css, html, LitElement} from 'lit'
-import {customElement} from 'lit/decorators.js'
-import {Inventory, Rarity, Storage} from "../storage.ts";
+import {customElement, property} from 'lit/decorators.js'
+import {Inventory, Rarity, storage} from "../storage.ts";
 
 @customElement('bin-go-inventory')
 export class BinGoInventory extends LitElement {
 
-    private readonly storage = new Storage()
-
+    @property()
     private inventory: Inventory
 
     private updateListener = () => {
@@ -15,16 +14,16 @@ export class BinGoInventory extends LitElement {
 
     constructor() {
         super();
-        this.inventory = this.storage.getInventory()
+        this.inventory = storage.getInventory()
     }
 
     connectedCallback() {
         super.connectedCallback();
-        this.storage.addInventoryListener(this.updateListener);
+        storage.addInventoryListener(this.updateListener);
     }
 
     disconnectedCallback() {
-        this.storage.removeInventoryListener(this.updateListener)
+        storage.removeInventoryListener(this.updateListener)
         super.disconnectedCallback();
     }
 
@@ -48,14 +47,13 @@ export class BinGoInventory extends LitElement {
             html`<div class="amount-container">
                         <span class="amount">${amount}</span></div>` :
             html`<div class="amount-container">
-                        <span class="amount">${amount}</span>
-                        <span class="partsToAWhole">${partsToAWhole}</span></div>` }
+                        <span class="amount">${amount}</span>/<span class="partsToAWhole">${partsToAWhole}</span></div>` }
         </div>`
     }
 
     private updateInventory() {
         console.log("Update Inventory")
-        this.inventory = this.storage.getInventory()
+        this.inventory = storage.getInventory()
     }
 
     static styles = css`

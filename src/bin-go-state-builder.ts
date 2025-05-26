@@ -103,9 +103,9 @@ export class BinGoStateBuilder {
 
     private getRarity(): Rarity {
         const roll = this.randomInt(0, 999);
-        if (roll < 8) { return Rarity.Epic }
-        else if (roll < 88) { return Rarity.Rare }
-        else if (roll < 338) { return Rarity.Uncommon }
+        if (roll < 5) { return Rarity.Epic }
+        else if (roll < 55) { return Rarity.Rare }
+        else if (roll < 305) { return Rarity.Uncommon }
         else return Rarity.Common
     }
 

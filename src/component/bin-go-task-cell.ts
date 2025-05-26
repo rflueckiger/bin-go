@@ -1,6 +1,6 @@
 import {LitElement, css, html} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {Storage} from "../storage.ts";
+import {storage} from "../storage.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 
 @customElement('bin-go-task-cell')
@@ -8,8 +8,6 @@ export class BinGoTaskCell extends LitElement {
 
     @property()
     public cellState?: TaskCellState;
-
-    private readonly storage = new Storage()
 
     private timer?: number
 
@@ -51,7 +49,7 @@ export class BinGoTaskCell extends LitElement {
         }
 
         this.cellState.marked = true;
-        this.storage.updateCellState(this.cellState)
+        storage.updateCellState(this.cellState)
         this.requestUpdate()
 
         this.dispatchEvent(new CustomEvent('marked', {

@@ -1,6 +1,6 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {RewardSpec, Task, Rarity, Storage} from "../storage.ts";
+import {RewardSpec, Task, Rarity, storage} from "../storage.ts";
 import '../component/bin-go-reward-editor.ts';
 import ShortUniqueId from 'short-unique-id';
 
@@ -28,12 +28,10 @@ export class BinGoEditPage extends LitElement {
     @state()
     private editing?: Task | RewardSpec = undefined
 
-    private storage = new Storage()
-
     constructor() {
         super();
 
-        const config = this.storage.getConfig();
+        const config = storage.getConfig();
         if (config) {
             this.tasks = config.tasks;
             this.rewardSpecs = config.rewardSpecs;
@@ -108,12 +106,12 @@ export class BinGoEditPage extends LitElement {
     }
 
     private done() {
-        this.storage.updateConfig({
+        storage.updateConfig({
             version: this.version,
             tasks: this.tasks,
             rewardSpecs: this.rewardSpecs,
         })
-        this.storage.clearState()
+        storage.clearState()
         this.sendDone();
     }
 

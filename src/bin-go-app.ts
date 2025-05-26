@@ -3,7 +3,7 @@ import {customElement, state} from 'lit/decorators.js'
 import './pwa-badge'
 import './page/bin-go-edit-page.ts'
 import './page/bin-go-play-page.ts'
-import {Storage} from "./storage.ts";
+import {storage} from "./storage.ts";
 
 @customElement('bin-go-app')
 export class BinGoApp extends LitElement {
@@ -11,12 +11,10 @@ export class BinGoApp extends LitElement {
     @state()
     private editMode = false;
 
-    private readonly storage = new Storage()
-
     constructor() {
         super();
 
-        const config = this.storage.getConfig();
+        const config = storage.getConfig();
 
         // if there is no config, go to edit mode
         if (!config) {

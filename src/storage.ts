@@ -144,19 +144,26 @@ export class Storage {
 
         const inventory = this.getInventory()
         if (!inventory) {
-            throw new Error('Can not update inventory, because inventory could not be loaded.')
+            throw new Error('Cannot update inventory, because inventory could not be loaded.')
         }
 
         rewards.forEach(reward => {
             if (reward.type === 'coins') {
                 inventory.coins += reward.amount
             } else {
-                // TODO: do merging of items with same key and update specs (label, rarity, etc.)
-                inventory.items.push(reward)
+                const existingItems = inventory.items.find(item => item.key === reward.key)
+                if (existingItems) {
+                    existingItems.amount += reward.amount
+
+                    // update other properties, the item might have received an overhaul in the meantime
+                    existingItems.label = reward.label
+                    existingItems.rarity = reward.rarity
+                    existingItems.partsToAWhole = reward.partsToAWhole
+                } else {
+                    inventory.items.push(reward)
+                }
             }
         })
-
-        // TODO: do item merging here to also handle past merging mistakes...
 
         localStorage.setItem('inventory', JSON.stringify(inventory));
         this.inventoryListeners.forEach(listener => listener())
@@ -179,3 +186,5 @@ export class Storage {
         localStorage.removeItem('state');
     }
 }
+
+export const storage = new Storage();
