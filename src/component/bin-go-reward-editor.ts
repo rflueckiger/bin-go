@@ -126,10 +126,10 @@ export class BinGoRewardEditor extends LitElement {
                 padding: 3px 8px;
                 border-radius: 4px;
             }
-            .container.common { background: #d5d5d5; }
-            .container.uncommon { background: #9ed591; }
-            .container.rare { background: #a9d1f4; }
-            .container.epic { background: #d4b3de; }
+            .container.common { background: var(--app-color-common); }
+            .container.uncommon { background: var(--app-color-uncommon); }
+            .container.rare { background: var(--app-color-rare); }
+            .container.epic { background: var(--app-color-epic); }
             .fields-editable {
                 display: flex;
                 gap: 5px;

@@ -33,7 +33,7 @@ export class BinGoInventory extends LitElement {
             return html`No rewards collected yet`
         } else {
             return html`
-                <div>
+                <div class="items-layout">
                     ${this.renderItem(Rarity.Common, '🪙', this.inventory.coins, 1)}
                     ${this.inventory.items.map(reward => this.renderItem(reward.rarity, reward.label, reward.amount, reward.partsToAWhole))}
                 </div>
@@ -60,7 +60,40 @@ export class BinGoInventory extends LitElement {
 
     static styles = css`
         :host {
-            
+            .items-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-gap: 1rem;
+            }
+            .item-container {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                border-radius: 5px;
+            }
+            .icon {
+                aspect-ratio: 1;
+                background: white;
+                width: 50px;
+                border-radius: 5px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 32px;
+                margin: 5px;
+            }
+            .item-container.epic {
+                background: var(--app-color-epic);
+            }
+            .item-container.rare {
+                background: var(--app-color-rare);
+            }
+            .item-container.uncommon {
+                background: var(--app-color-uncommon);
+            }
+            .item-container.common {
+                background: var(--app-color-common);
+            }
         }
     `
 }
