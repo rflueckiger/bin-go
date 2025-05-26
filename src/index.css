@@ -6,6 +6,11 @@
   --app-color-reward-background: #ffa62b;
   --app-color-reward-marked-background: #ffa62b;
 
+  --app-color-common: #d5d5d5;
+  --app-color-uncommon: #9ed591;
+  --app-color-rare: #a9d1f4;
+  --app-color-epic: #d4b3de;
+
   font-family: "Roboto Condensed", sans-serif;
   font-optical-sizing: auto;
   font-weight: 500;
