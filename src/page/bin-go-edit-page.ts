@@ -30,15 +30,16 @@ export class BinGoEditPage extends LitElement {
 
     render() {
         return html`
-            <h1>Edit Mode</h1>
-
             <h3>Define 9 Tasks</h3>
-            <div class="list">
-                ${this.tasks.map(task => this.renderTaskRow(task))}
+            <div class="paragraph">Use Emojis to represent your tasks. For best experience use 1 Emoji per task.</div>
+            <div class="list task-list">
+                <div class="task-row">${this.tasks.slice(0, 3).map(task => this.renderTaskRow(task))}</div>
+                <div class="task-row">${this.tasks.slice(3, 6).map(task => this.renderTaskRow(task))}</div>
+                <div class="task-row">${this.tasks.slice(6, 9).map(task => this.renderTaskRow(task))}</div>
             </div>
 
             <h3>Define Rewards</h3>
-            <div class="list">
+            <div class="list reward-list">
                 ${this.rewardSpecs.map(rewardSpec => {
                     return html`
                         <div class="list-item reward-item">
@@ -80,7 +81,6 @@ export class BinGoEditPage extends LitElement {
         return html`
             <div class="list-item task-item">
                 <input class="task-icon" .value="${task.icon}" @input=${this.inputToObjectUpdateHandler(task, 'icon')}/>
-                <input class="task-description" .value="${task.description || ''}" @input=${this.inputToObjectUpdateHandler(task, 'description')}/>
             </div>
         `
     }
@@ -124,6 +124,23 @@ export class BinGoEditPage extends LitElement {
             }
             .link:hover {
                 color: #ffa62b;
+            }
+            .paragraph {
+                margin-bottom: 1rem;
+            }
+            .task-row {
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+            .task-item {
+                margin-bottom: 5px;
+            }
+            .task-icon {
+                height: 32px;
+                width: 64px;
+                font-size: 2rem;
+                text-align: center;
             }
             .reward-item {
                 display: flex;
