@@ -1,6 +1,7 @@
 import {css, html, LitElement} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
 import {Inventory, Rarity, storage} from "../storage.ts";
+import {Reward} from "../domain/reward.ts";
 
 @customElement('bin-go-inventory')
 export class BinGoInventory extends LitElement {
@@ -34,9 +35,27 @@ export class BinGoInventory extends LitElement {
             return html`
                 <div class="items-layout">
                     ${this.renderItem(Rarity.Common, '🪙', this.inventory.coins, 1)}
-                    ${this.inventory.items.map(reward => this.renderItem(reward.rarity, reward.label, reward.amount, reward.partsToAWhole))}
+                    ${this.inventory.items.sort(this.rewardSorter).map(reward => this.renderItem(reward.rarity, reward.label, reward.amount, reward.partsToAWhole))}
                 </div>
             `
+        }
+    }
+
+    private rewardSorter(r1: Reward, r2: Reward) {
+        const rarityDiff = BinGoInventory.getRarityOrder(r1.rarity) - BinGoInventory.getRarityOrder(r2.rarity)
+        if (rarityDiff !== 0) {
+            return rarityDiff
+        }
+        return r1.key.localeCompare(r2.key)
+    }
+
+    private static getRarityOrder(rarity: Rarity): number {
+        switch (rarity) {
+            case Rarity.Epic: return 0;
+            case Rarity.Rare: return 1;
+            case Rarity.Uncommon: return 2;
+            case Rarity.Common: return 3;
+            default: return 5;
         }
     }
 
