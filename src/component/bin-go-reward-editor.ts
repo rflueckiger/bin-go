@@ -44,7 +44,6 @@ export class BinGoRewardEditor extends LitElement {
         return html`
             <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${rewardSpec.type.toUpperCase()}</span>
                     <span>${rewardSpec.label}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
                     <span>${rewardSpec.partsToAWhole !== 1 ? html`<span>Collect: ${rewardSpec.partsToAWhole}</span>` : nothing}</span>
@@ -70,7 +69,7 @@ export class BinGoRewardEditor extends LitElement {
         return html`
             <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${rewardSpec.type.toUpperCase()}</span>
+                    <span>${rewardSpec.label}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
                 </div>
             </div>

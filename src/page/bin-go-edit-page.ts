@@ -75,7 +75,7 @@ export class BinGoEditPage extends LitElement {
                         this.requestUpdate()
                     }}">Item</a>
                     <a href="#" @click="${() => {
-                        const newEmptyReward = { key: `${this.uid.rnd()}`, label: '', type: 'coins', min: 3, max: 8, partsToAWhole: 1, rarity: Rarity.Common }
+                        const newEmptyReward = { key: `${this.uid.rnd()}`, label: '🪙', type: 'coins', min: 3, max: 8, partsToAWhole: 1, rarity: Rarity.Common }
                         this.rewardSpecs.push(newEmptyReward)
                         this.editing = newEmptyReward
                         this.requestUpdate()

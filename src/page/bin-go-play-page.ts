@@ -98,7 +98,7 @@ export class BinGoPlayPage extends LitElement {
             const rewardCellState = cellState as RewardCellState
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '???' : '?'}</div>` : nothing }
+                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '💰💰' : '💰'}</div>` : nothing }
                 </div>`
         }
         return nothing
@@ -162,6 +162,7 @@ export class BinGoPlayPage extends LitElement {
                 border-radius: 5px;
                 display: flex;
                 user-select: none;
+                min-height: 60px;
             }
 
             .cell .label {
@@ -171,6 +172,10 @@ export class BinGoPlayPage extends LitElement {
             
             .cell.reward {
                 background: #ffa62b;
+            }
+            
+            .cell.reward .label {
+                font-size: 2.5rem;
             }
             
             .cell.reward.marked {
