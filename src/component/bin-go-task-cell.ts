@@ -28,6 +28,9 @@ export class BinGoTaskCell extends LitElement {
     };
 
     render() {
+        // TODO: support 1 emoji or 2 emojis as either/or choice (split the icon string)
+        // TODO: display description as tooltip?
+
         return html`
             <div class="cell ${this.cellState?.marked ? 'marked' : ''}" 
                  @touchstart="${this.startHold}"
@@ -38,7 +41,7 @@ export class BinGoTaskCell extends LitElement {
                  @mouseleave="${this.cancelHold}"
             >
                 <div class="circle"></div>
-                <div class="label">${this.cellState?.label}</div>
+                <div class="icon">${this.cellState?.icon}</div>
             </div>
         `
     }
@@ -80,7 +83,7 @@ export class BinGoTaskCell extends LitElement {
             transform: scale(1.05);
         }
 
-        .label {
+        .icon {
             margin: auto;
             z-index: 2;
             text-transform: uppercase;

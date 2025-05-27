@@ -24,7 +24,8 @@ export class BinGoRewardEditor extends LitElement {
             return html`
                 <div class="container">
                     <div class="fields-editable">
-                        <input class="reward-name" .value=${rewardSpec.label} @input=${this.updateStringInputHandler(rewardSpec, 'label')}/>
+                        <input class="reward-icon" .value=${rewardSpec.icon} @input=${this.updateStringInputHandler(rewardSpec, 'icon')}/>
+                        <input class="reward-description" .value=${rewardSpec.description || ''} @input=${this.updateStringInputHandler(rewardSpec, 'description')}/>
                         <select class="reward-rarity" .value="${rewardSpec.rarity}" @input="${this.updateStringInputHandler(rewardSpec, 'rarity')}">
                             ${Object.keys(Rarity).map(key => {
                                 const value = Rarity[key as keyof typeof Rarity];
@@ -44,9 +45,10 @@ export class BinGoRewardEditor extends LitElement {
         return html`
             <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${rewardSpec.label}</span>
+                    <span>${rewardSpec.icon}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
-                    <span>${rewardSpec.partsToAWhole !== 1 ? html`<span>Collect: ${rewardSpec.partsToAWhole}</span>` : nothing}</span>
+                    ${rewardSpec.partsToAWhole !== 1 ? html`<span>Collect: ${rewardSpec.partsToAWhole}</span>` : nothing}
+                    ${rewardSpec.owner ? html`<span>${rewardSpec.owner}</span>` : nothing}
                 </div>
             </div>
         `
@@ -69,7 +71,7 @@ export class BinGoRewardEditor extends LitElement {
         return html`
             <div class="container ${rewardSpec.rarity}">
                 <div class="fields-readonly">
-                    <span>${rewardSpec.label}</span>
+                    <span>${rewardSpec.icon}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
                 </div>
             </div>

@@ -13,7 +13,7 @@ export class BinGoStateBuilder {
     }
 
     public createState(): BoardState {
-        const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task.key, task.label))
+        const tasksCellStates: TaskCellState[] = this.config.tasks.map((task, index) => new TaskCellState(index, task.key, task.icon, task.description))
 
         // create 6 RewardCellStates and for each create rewards
         const rewardCellStates: RewardCellState[] = []
@@ -79,17 +79,20 @@ export class BinGoStateBuilder {
             default: return {
                 type: rewardSpec.type,
                 key: rewardSpec.key,
-                label: rewardSpec.label,
+                icon: rewardSpec.icon,
+                description: rewardSpec.description,
                 rarity: rewardSpec.rarity,
-                amount: this.getGaussianAmount(rewardSpec),
-                partsToAWhole: rewardSpec.partsToAWhole
+                amount: this.getAmount(rewardSpec),
+                partsToAWhole: rewardSpec.partsToAWhole,
+                owner: rewardSpec.owner,
             }
         }
     }
 
-    private getGaussianAmount(rewardSpec: RewardSpec): number {
+    private getAmount(rewardSpec: RewardSpec): number {
         if (rewardSpec.min !== rewardSpec.max) {
-            return this.logDecayRandomInt(rewardSpec.min, rewardSpec.max)
+            // TODO: impl proper amount function
+            return Math.floor(rewardSpec.max - rewardSpec.min)
         }
         return rewardSpec.min
     }
@@ -111,39 +114,6 @@ export class BinGoStateBuilder {
 
     private randomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    // chatgpt
-    // private randomGaussianInt(min: number, max: number, samples: number = 6): number {
-    //     if (min > max) throw new Error("min must be <= max");
-    //
-    //     const mean = (min + max) / 2;
-    //     const stddev = (max - min) / 6; // Approx 99.7% values fall in this range for normal dist
-    //
-    //     // Approximate Gaussian by averaging `samples` uniform random values
-    //     let sum = 0;
-    //     for (let i = 0; i < samples; i++) {
-    //         sum += Math.random();
-    //     }
-    //     const normalized = (sum / samples - 0.5) * Math.sqrt(12); // Normalize to mean 0, stddev ~1
-    //     const gaussian = mean + normalized * stddev;
-    //
-    //     // Clamp to range and return integer
-    //     return Math.max(min, Math.min(max, Math.round(gaussian)));
-    // }
-
-    // chatgpt
-    private logDecayRandomInt(min: number, max: number, a = 0.2) {
-        if (min >= max) throw new Error("min must be less than max");
-        if (a <= 0 || a >= 1) throw new Error("a must be between 0 and 1 (exclusive)");
-
-        const rnd = Math.random();
-
-        // Apply inverse log-like transformation
-        const transformed = Math.pow(2, 1 - rnd) - 1; // maps [0,1) -> [0,1) with log-shaped bias
-        const scaled = min + (max - min) * transformed;
-
-        return Math.floor(scaled);
     }
 
     // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array

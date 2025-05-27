@@ -17,17 +17,20 @@ export interface AppConfig {
 
 export interface Task {
     key: string;
-    label: string;
+    icon: string;           // emoji to represent the task, supports one or two characters (if the user has choices)
+    description?: string;   // an optional description of the task
 }
 
 export interface RewardSpec {
-    type: string;       // i.e. 'item', 'coins' -- identifies the technical type
+    type: string;       // i.e. 'item', 'coins', 'secret' -- identifies the technical type
     key: string;        // the identifier of the reward, same key means the items can be combined, i.e. the name of an item like "cake"
-    label: string;      // the label of this reward, displayed to the user instead of the technical key
+    description?: string;   // the label of this reward, displayed to the user instead of the technical key
     partsToAWhole: number;  // whether multiple of these must be collected to generate a whole
     min: number;        // the min amount gained per reward
     max: number;        // the max amount gained per reward (the actual value will be random)
-    rarity: Rarity ;    // the rarity of the item
+    rarity: Rarity;     // the rarity of the item
+    icon: string;       // emoji to represent the reward, support 1 character
+    owner?: string;     // marks that this reward is gifted by someone else and can't be edited
 }
 
 export interface Inventory {
@@ -156,9 +159,11 @@ export class Storage {
                     existingItems.amount += reward.amount
 
                     // update other properties, the item might have received an overhaul in the meantime
-                    existingItems.label = reward.label
+                    existingItems.icon = reward.icon
+                    existingItems.description = reward.description
                     existingItems.rarity = reward.rarity
                     existingItems.partsToAWhole = reward.partsToAWhole
+                    existingItems.owner = reward.owner
                 } else {
                     inventory.items.push(reward)
                 }

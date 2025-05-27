@@ -34,8 +34,8 @@ export class BinGoInventory extends LitElement {
         } else {
             return html`
                 <div class="items-layout">
-                    ${this.renderItem(Rarity.Common, '🪙', this.inventory.coins, 1)}
-                    ${this.inventory.items.sort(this.rewardSorter).map(reward => this.renderItem(reward.rarity, reward.label, reward.amount, reward.partsToAWhole))}
+                    ${this.renderCoins(this.inventory.coins)}
+                    ${this.inventory.items.sort(this.rewardSorter).map(reward => this.renderItem(reward))}
                 </div>
             `
         }
@@ -59,14 +59,25 @@ export class BinGoInventory extends LitElement {
         }
     }
 
-    private renderItem(rarity: Rarity, icon: string, amount: number, partsToAWhole: number) {
-        return html`<div class="item-container ${rarity}">
-            <div class="icon">${icon}</div>
-            ${partsToAWhole === 1 ?
+    private renderCoins(amount: number) {
+        return html`<div class="item-container ${Rarity.Common}">
+            <div class="icon">🪙</div>
+            <div class="amount-container">
+                <span class="amount">${amount}</span>
+            </div>
+        </div>`
+    }
+
+    private renderItem(reward: Reward) {
+        // TODO: add description
+        // TODO: add owner if applicable
+        return html`<div class="item-container ${reward.rarity}">
+            <div class="icon">${reward.icon}</div>
+            ${reward.partsToAWhole === 1 ?
             html`<div class="amount-container">
-                        <span class="amount">${amount}</span></div>` :
+                        <span class="amount">${reward.amount}</span></div>` :
             html`<div class="amount-container">
-                        <span class="amount">${amount}</span>/<span class="partsToAWhole">${partsToAWhole}</span></div>` }
+                        <span class="amount">${reward.amount}</span>/<span class="partsToAWhole">${reward.partsToAWhole}</span></div>` }
         </div>`
     }
 

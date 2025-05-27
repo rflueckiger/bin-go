@@ -98,7 +98,7 @@ export class BinGoPlayPage extends LitElement {
             const rewardCellState = cellState as RewardCellState
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '💰💰' : '💰'}</div>` : nothing }
+                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '🎁🎁' : '🎁'}</div>` : nothing }
                 </div>`
         }
         return nothing
