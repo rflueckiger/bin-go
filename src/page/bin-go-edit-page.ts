@@ -114,7 +114,7 @@ export class BinGoEditPage extends LitElement {
         event.stopPropagation()
         this.rewardSpecs.push(event.detail)
         this.adding = undefined
-        // this.save();
+        this.save();
         this.requestUpdate()
     }
 
@@ -173,10 +173,12 @@ export class BinGoEditPage extends LitElement {
             .paragraph {
                 max-width: 55ch;
                 margin: 1rem auto;
+                text-align: center;
             }
             .title {
                 margin: 1rem 0 0.5rem;
                 font-size: 1.5rem;
+                text-align: center;
             }
             .foldable {
                 background: var(--app-color-task-background);
@@ -211,9 +213,11 @@ export class BinGoEditPage extends LitElement {
             }
             .list-actions {
                 margin-top: 1rem;
+                text-align: center;
             }
             .action-bar {
                 margin-top: 1rem;
+                text-align: center;
             }
         }  `
 }

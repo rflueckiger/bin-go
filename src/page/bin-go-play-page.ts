@@ -54,12 +54,12 @@ export class BinGoPlayPage extends LitElement {
 
     render() {
         return html`
-            <h1>BinGo!</h1>
+            <h1 class="header">BinGo!</h1>
             <div class="action-bar">
                 <a class="link" href="#" @click="${this.sendEdit}">Edit</a>
             </div>
             ${this.renderBoard()}
-            <h1>Inventory</h1>
+            <h1 class="header">Inventory</h1>
             <bin-go-inventory></bin-go-inventory>
         `
     }
@@ -150,51 +150,53 @@ export class BinGoPlayPage extends LitElement {
     }
 
     static styles = css`
-        :host {
-            .board {
-                display: grid;
-                grid-template-columns: 1fr 1fr 1fr 1fr;
-                grid-gap: 8px;
-            }
-            
-            .cell {
-                padding: 0.5rem;
-                border-radius: 5px;
-                display: flex;
-                user-select: none;
-                min-height: 60px;
-            }
+        .board {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-gap: 8px;
+        }
+        .header {
+            text-align: center;
+        }
+        .cell {
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            user-select: none;
+            min-height: 60px;
+        }
 
-            .cell .label {
-                margin: auto;
-                text-transform: uppercase;
-            }
-            
-            .cell.reward {
-                background: #ffa62b;
-            }
-            
-            .cell.reward .label {
-                font-size: 2.5rem;
-            }
-            
-            .cell.reward.marked {
-                background: #ffa62b;
-                opacity: 0.25;
-            }
-            
-            .action-bar {
-                margin-bottom: 1.5rem;
-            }
-            
-            .link {
-                color: #16697a;
-                text-decoration: underline;
-            }
-            .link:hover {
-                color: #ffa62b;
-            }
-        }`
+        .cell .label {
+            margin: auto;
+            text-transform: uppercase;
+        }
+
+        .cell.reward {
+            background: #ffa62b;
+        }
+
+        .cell.reward .label {
+            font-size: 2.5rem;
+        }
+
+        .cell.reward.marked {
+            background: #ffa62b;
+            opacity: 0.25;
+        }
+
+        .action-bar {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .link {
+            color: #16697a;
+            text-decoration: underline;
+        }
+        .link:hover {
+            color: #ffa62b;
+        }
+    `
 }
 
 declare global {

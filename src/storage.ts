@@ -181,6 +181,16 @@ export class Storage {
         this.inventoryListeners.forEach(listener => listener())
     }
 
+    public updateRewardAmount(key: string, amount: number) {
+        console.log(`Updating amount of reward "${key}" to ${amount}`)
+        const inventory = this.getInventory()
+        const existingReward = inventory.items.find(r => r.key == key)
+        if (existingReward) {
+            existingReward.amount = amount
+            localStorage.setItem('inventory', JSON.stringify(inventory))
+        }
+    }
+
     private static findCellState(state: BoardState, type: 'task' | 'reward', id: number): CellState | undefined {
         let cellStates
         if (type === 'task') { cellStates = state.tasks }
