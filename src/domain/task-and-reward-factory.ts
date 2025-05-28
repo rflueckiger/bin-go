@@ -16,7 +16,7 @@ export class TaskAndRewardFactory {
         return {
             type: 'item',
             key: `${TaskAndRewardFactory.UID.rnd()}`,
-            icon: '🎁',
+            icon: '🧩',
             min: 1,
             max: 1,
             partsToAWhole: 1,
