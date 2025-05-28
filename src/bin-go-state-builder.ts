@@ -1,4 +1,4 @@
-import {AppConfig, RewardSpec, Rarity} from "./storage.ts";
+import {AppConfig, Rarity, RewardSpec, storage} from "./storage.ts";
 import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
@@ -106,10 +106,14 @@ export class BinGoStateBuilder {
 
     private getRarity(): Rarity {
         const roll = this.randomInt(0, 999);
-        if (roll < 5) { return Rarity.Epic }
-        else if (roll < 55) { return Rarity.Rare }
-        else if (roll < 305) { return Rarity.Uncommon }
+        if (roll < this.sumRarityChance([Rarity.Epic])) { return Rarity.Epic }
+        else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare])) { return Rarity.Rare }
+        else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare, Rarity.Uncommon])) { return Rarity.Uncommon }
         else return Rarity.Common
+    }
+
+    private sumRarityChance(rarities: Rarity[]): number {
+        return rarities.map(r => storage.rarityChances[r]).reduce((sum, chance) => sum + chance)
     }
 
     private randomInt(min: number, max: number): number {

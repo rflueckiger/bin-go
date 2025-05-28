@@ -42,6 +42,13 @@ export class Storage {
 
     public static VERSION = 1;
 
+    public rarityChances: { [key in Rarity]: number } = {
+        [Rarity.Epic]: 5,
+        [Rarity.Rare]: 50,
+        [Rarity.Uncommon]: 250,
+        [Rarity.Common]: 695
+    }
+
     private inventoryListeners: (() => void)[] = []
 
     public addInventoryListener(listener: () => void) {
