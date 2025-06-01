@@ -145,7 +145,6 @@ export class BinGoEditPage extends LitElement {
             tasks: this.tasks,
             rewardSpecs: this.rewardSpecs,
         })
-        storage.clearState()
     }
 
     private sendDone() {
