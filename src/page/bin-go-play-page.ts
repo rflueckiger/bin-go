@@ -15,24 +15,18 @@ import '../component/bin-go-inventory.ts';
 export class BinGoPlayPage extends LitElement {
 
     @state()
-    private readonly state?: BoardState
+    private state?: BoardState
 
     constructor() {
         super();
 
-        let state = storage.getState()
-
-        // if there is no game state or if the game state has expired, create new game state
-        if (!state || this.hasExpired(state)) {
-            const config = storage.getConfig()
-            if (!config) {
-                throw new Error('IllegalStateException')
-            }
-            state = new BinGoStateBuilder(config).createState()
-            storage.updateState(state)
+        const state = storage.getState()
+        if (state && !this.hasExpired(state)) {
+            this.state = state
+        } else {
+            // if there is no game state or if the game state has expired, create new game state
+            this.resetState()
         }
-
-        this.state = state;
     }
 
     private hasExpired(state: BoardState) {
@@ -54,10 +48,15 @@ export class BinGoPlayPage extends LitElement {
 
     render() {
         return html`
-            <h1 class="header">BinGo!</h1>
-            <div class="action-bar">
-                <a class="link" href="#" @click="${this.sendEdit}">Edit</a>
-            </div>
+            <div class="header-row">
+                <div class="action-bar bar-left">
+                    <a class="link" href="#" @click="${this.resetState}">Reset</a>
+                </div>
+                <h1 class="header">BinGo!</h1>
+                <div class="action-bar bar-right">
+                    <a class="link" href="#" @click="${this.sendEdit}">Edit</a>
+                </div>
+            </div>            
             ${this.renderBoard()}
             <h1 class="header">Inventory</h1>
             <bin-go-inventory></bin-go-inventory>
@@ -139,6 +138,18 @@ export class BinGoPlayPage extends LitElement {
         this.requestUpdate()
     }
 
+    private resetState(force = false) {
+        if (force) {
+            // TODO:
+        }
+        const config = storage.getConfig()
+        if (!config) {
+            throw new Error('IllegalStateException')
+        }
+        this.state = new BinGoStateBuilder(config).createState()
+        storage.updateState(this.state)
+    }
+
     private sendEdit() {
         const event = new CustomEvent('edit', {
             detail: 'edit',
@@ -155,8 +166,13 @@ export class BinGoPlayPage extends LitElement {
             grid-template-columns: 1fr 1fr 1fr 1fr;
             grid-gap: 8px;
         }
+        .header-row {
+            display: flex;
+            align-items: baseline;
+        }
         .header {
             text-align: center;
+            flex: 1;
         }
         .cell {
             padding: 0.5rem;
@@ -185,8 +201,8 @@ export class BinGoPlayPage extends LitElement {
         }
 
         .action-bar {
-            margin-bottom: 1.5rem;
-            text-align: center;
+            display: flex;
+            gap: 0.5rem;
         }
 
         .link {
