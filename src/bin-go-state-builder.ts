@@ -3,11 +3,13 @@ import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
 import {Rarity, Reward, RewardType} from "./domain/reward.ts";
-import {RangedBellCurveAmountFunction} from "./domain/functions/ranged-bell-curve-amount-function.ts";
+import {LinearAmountFunction} from "./domain/functions/linear-amount-function.ts";
 
 export class BinGoStateBuilder {
 
     private readonly config: AppConfig;
+
+    private readonly amountFunction = new LinearAmountFunction();
 
     constructor(config: AppConfig) {
         this.config = config;
@@ -94,8 +96,7 @@ export class BinGoStateBuilder {
 
     private getAmount(rewardSpec: RewardSpec): number {
         if (rewardSpec.min !== rewardSpec.max) {
-            // TODO: impl proper amount function
-            return Math.floor(rewardSpec.max - rewardSpec.min)
+            return this.amountFunction.getAmount(rewardSpec.min, rewardSpec.max)
         }
         return rewardSpec.min
     }
