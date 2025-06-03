@@ -1,6 +1,8 @@
 import {LitElement, css, html, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {RewardSpec, Rarity} from "../storage.ts";
+import {RewardSpec, RewardSpecType} from "../storage.ts";
+import {Rarity} from "../domain/reward.ts";
+import {RangedBellCurveAmountFunction} from "../domain/functions/ranged-bell-curve-amount-function.ts";
 
 @customElement('bin-go-reward-editor')
 export class BinGoRewardEditor extends LitElement {
@@ -13,13 +15,13 @@ export class BinGoRewardEditor extends LitElement {
 
     render() {
         switch (this.rewardSpec?.type) {
-            case 'item': return this.handleRewardTypeItem(this.rewardSpec)
-            case 'coins': return this.handleRewardTypeCoins(this.rewardSpec)
+            case RewardSpecType.Collectible: return this.handleRewardTypeCollectible(this.rewardSpec)
+            case RewardSpecType.Coins: return this.handleRewardTypeCoins(this.rewardSpec)
             default: throw Error('Unknown reward type')
         }
     }
 
-    private handleRewardTypeItem(rewardSpec: RewardSpec) {
+    private handleRewardTypeCollectible(rewardSpec: RewardSpec) {
         if (this.editing) {
             return html`
                 <div class="container">
@@ -42,7 +44,7 @@ export class BinGoRewardEditor extends LitElement {
                         <div class="label">Teile für ein Ganzes</div>
                         <input class="reward-partsToAWhole field-number" .value=${rewardSpec.partsToAWhole} @input=${this.updateNumberInputHandler(rewardSpec, 'partsToAWhole')}/>
                         <div class="label">Coins</div>
-                        <input class="reward-value field-number" .value=${rewardSpec.value} @input=${this.updateNumberInputHandler(rewardSpec, 'value')}/>
+                        <input class="reward-value field-number" .value=${rewardSpec.value || 0} @input=${this.updateNumberInputHandler(rewardSpec, 'value')}/>
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>

@@ -56,7 +56,7 @@ export class BinGoEditPage extends LitElement {
             ${Object.values(Rarity).map(rarity => this.renderRewardGroup(rarity))}
             <div class="list-actions">
                 <span>Hinzufügen:</span>
-                <a href="#" @click="${() => this.adding = this.taskAndRewardFactory.newItemSpec()}">Sammelstück</a>
+                <a href="#" @click="${() => this.adding = this.taskAndRewardFactory.newCollectibleSpec()}">Sammelstück</a>
                 <a href="#" @click="${() => this.adding = this.taskAndRewardFactory.newCoinsSpec()}">Münzen</a>
                 ${this.adding ? html`<bin-go-reward-editor .rewardSpec="${this.adding}" .editing="${true}" @done="${(event: CustomEvent) => this.addNewRewardSpec(event)}"></bin-go-reward-editor>` : nothing }
             </div>

@@ -1,5 +1,6 @@
 import {Rarity, RewardSpec, Task} from "../storage.ts";
 import ShortUniqueId from "short-unique-id";
+import {Rarity} from "./reward.ts";
 
 export class TaskAndRewardFactory {
 
@@ -12,9 +13,9 @@ export class TaskAndRewardFactory {
         }
     }
 
-    public newItemSpec(): RewardSpec {
+    public newCollectibleSpec(): RewardSpec {
         return {
-            type: 'item',
+            type: RewardSpecType.Collectible,
             key: `${TaskAndRewardFactory.UID.rnd()}`,
             icon: '🧩',
             min: 1,
@@ -26,7 +27,7 @@ export class TaskAndRewardFactory {
 
     public newCoinsSpec(): RewardSpec {
         return {
-            type: 'coins',
+            type: RewardSpecType.Coins,
             key: `${TaskAndRewardFactory.UID.rnd()}`,
             icon: '🪙',
             min: 1,

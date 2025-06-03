@@ -1,4 +1,14 @@
-import {Rarity} from "../storage.ts";
+export enum Rarity {
+    Common = 'common',
+    Uncommon = 'uncommon',
+    Rare = 'rare',
+    Epic = 'epic'
+}
+
+export enum RewardType {
+    Collectible = 'collectible',
+    Unique = 'unique',
+}
 
 export interface Reward {
     type: string

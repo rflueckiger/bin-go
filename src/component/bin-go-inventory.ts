@@ -4,9 +4,9 @@ import {Inventory, Operation, Rarity, storage, UNIQUE_REWARD_KEY_COINS} from "..
 import {Reward} from "../domain/reward.ts";
 
 export enum SpendAction {
-    SpendForCoins,    // means lose a specific amount of that item and convert it to coins
-    SpendForEffect    // means lose a specific amount of that item and use it in its intended way
-                          // (which is usually outside the app, so it means just reducing the item count)
+    SpendForCoins,    // means lose a specific amount of that collectible and convert it to coins
+    SpendForEffect    // means lose a specific amount of that collectible and use it in its intended way
+                          // (which is usually outside the app, so it means just reducing the collectible's count)
 }
 
 @customElement('bin-go-inventory')
@@ -45,8 +45,8 @@ export class BinGoInventory extends LitElement {
             return html`No rewards collected yet`
         } else {
             return html`
-                <div class="items-layout">
-                    ${this.inventory.rewards.sort(this.rewardSorter).map(reward => this.renderItem(reward))}
+                <div class="reward-layout">
+                    ${this.inventory.rewards.sort(this.rewardSorter).map(reward => this.renderReward(reward))}
                 </div>
                 <sl-dialog class="dialog" no-header>
                     <div class="dialog-title">${this.selectedReward?.icon}</div>
@@ -104,11 +104,11 @@ export class BinGoInventory extends LitElement {
         }
     }
 
-    private renderItem(reward: Reward) {
+    private renderReward(reward: Reward) {
         // TODO: add description
         // TODO: add owner if applicable
         return html`
-            <div class="item-container ${reward.rarity}" @click="${() => this.rewardSelected(reward)}">
+            <div class="reward-container ${reward.rarity}" @click="${() => this.rewardSelected(reward)}">
                 <div class="icon">${reward.icon}</div>
                 ${reward.partsToAWhole === 1 ?
                         html`
@@ -133,12 +133,12 @@ export class BinGoInventory extends LitElement {
 
     static styles = css`
         :host {
-            .items-layout {
+            .reward-layout {
                 display: grid;
                 grid-template-columns: 1fr 1fr 1fr;
                 grid-gap: 1rem;
             }
-            .item-container {
+            .reward-container {
                 display: flex;
                 gap: 1rem;
                 align-items: center;
@@ -156,16 +156,16 @@ export class BinGoInventory extends LitElement {
                 font-size: 32px;
                 margin: 5px;
             }
-            .item-container.epic {
+            .reward-container.epic {
                 background: var(--app-color-epic);
             }
-            .item-container.rare {
+            .reward-container.rare {
                 background: var(--app-color-rare);
             }
-            .item-container.uncommon {
+            .reward-container.uncommon {
                 background: var(--app-color-uncommon);
             }
-            .item-container.common {
+            .reward-container.common {
                 background: var(--app-color-common);
             }
         }

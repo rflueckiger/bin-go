@@ -35,7 +35,7 @@ export class BinGoStateBuilder {
     }
 
     private generateRewards(rewards: Reward[], maxRolls = 3, roll = 1) {
-        //   1. roll for rarity, then pick 1 item from that type randomly from the config
+        //   1. roll for rarity, then pick 1 reward from that type randomly from the config
         //   2. if epic/rare inside this loot box is done
         //   3. otherwise repeat for a maximum of 3 times total
 
@@ -52,7 +52,7 @@ export class BinGoStateBuilder {
 
             // maybe one more reward?
             if ((reward.rarity === Rarity.Uncommon || reward.rarity === Rarity.Common)
-                && this.randomInt(0, 5) < 2) { // one more item in 2/5 of cases
+                && this.randomInt(0, 5) < 2) { // one more rewards in 2/5 of cases
 
                 this.generateRewards(rewards, maxRolls, roll + 1)
             }
