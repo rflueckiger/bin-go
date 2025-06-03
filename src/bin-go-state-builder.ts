@@ -1,8 +1,9 @@
-import {AppConfig, Rarity, RewardSpec, storage} from "./storage.ts";
+import {AppConfig, RewardSpec, storage} from "./storage.ts";
 import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
-import {Reward} from "./domain/reward.ts";
+import {Rarity, Reward, RewardType} from "./domain/reward.ts";
+import {RangedBellCurveAmountFunction} from "./domain/functions/ranged-bell-curve-amount-function.ts";
 
 export class BinGoStateBuilder {
 
@@ -77,7 +78,7 @@ export class BinGoStateBuilder {
     private createReward(rewardSpec: RewardSpec): Reward {
         switch (rewardSpec.type) {
             default: return {
-                type: rewardSpec.type,
+                type: RewardType.Collectible,
                 key: rewardSpec.key,
                 icon: rewardSpec.icon,
                 description: rewardSpec.description,

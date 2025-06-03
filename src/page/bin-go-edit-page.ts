@@ -1,8 +1,9 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {Rarity, RewardSpec, storage, Task} from "../storage.ts";
+import {RewardSpec, storage, Task} from "../storage.ts";
 import '../component/bin-go-reward-editor.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
+import {Rarity} from "../domain/reward.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {

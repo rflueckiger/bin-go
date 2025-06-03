@@ -1,6 +1,6 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
-import {Rarity, storage} from "../storage.ts";
+import {storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
@@ -10,6 +10,7 @@ import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
 import '../component/bin-go-inventory.ts';
+import {Rarity} from "../domain/reward.ts";
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -139,8 +140,8 @@ export class BinGoPlayPage extends LitElement {
     }
 
     private resetState(force = false) {
-        if (force) {
-            // TODO:
+        if (!force) {
+            // TODO: show confirmation dialog
         }
         const config = storage.getConfig()
         if (!config) {

@@ -1,13 +1,6 @@
 import {BoardState} from "./domain/board-state.ts";
 import {CellState} from "./domain/cell-state.ts";
-import {Reward} from "./domain/reward.ts";
-
-export enum Rarity {
-    Common = 'common',
-    Uncommon = 'uncommon',
-    Rare = 'rare',
-    Epic = 'epic'
-}
+import {Rarity, Reward, RewardType} from "./domain/reward.ts";
 
 export interface AppConfig {
     version: number;
@@ -19,6 +12,11 @@ export interface Task {
     key: string;
     icon: string;           // emoji to represent the task, supports one or two characters (if the user has choices)
     description?: string;   // an optional description of the task
+}
+
+export enum RewardSpecType {
+    Coins = 'coins',
+    Collectible = 'collectible'
 }
 
 export interface RewardSpec {
@@ -42,21 +40,21 @@ export interface Inventory {
 
 export enum Operation {
     Add = 1,
-    Substract = -1
+    Subtract = -1
 }
 
 export const UNIQUE_REWARD_KEY_COINS = 'coins'
 
 export const createUniqueRewardCoins = (coins: number)  => {
     return {
-        type: 'unique',
+        type: RewardType.Unique,
         key: UNIQUE_REWARD_KEY_COINS,
         amount: coins,
         value: 1,
         rarity: Rarity.Common,
         icon: '🪙',
         partsToAWhole: 1,
-        description: 'Hobby Investment Coins'
+        description: 'Hobby Investment Coin'
     }
 }
 

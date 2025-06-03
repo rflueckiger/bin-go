@@ -1,4 +1,4 @@
-import {Rarity, RewardSpec, Task} from "../storage.ts";
+import {RewardSpec, RewardSpecType, Task} from "../storage.ts";
 import ShortUniqueId from "short-unique-id";
 import {Rarity} from "./reward.ts";
 

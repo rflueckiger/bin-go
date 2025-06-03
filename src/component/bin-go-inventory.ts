@@ -1,7 +1,7 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, property, query, state} from 'lit/decorators.js'
-import {Inventory, Operation, Rarity, storage, UNIQUE_REWARD_KEY_COINS} from "../storage.ts";
-import {Reward} from "../domain/reward.ts";
+import {Inventory, Operation, storage, UNIQUE_REWARD_KEY_COINS} from "../storage.ts";
+import {Rarity, Reward} from "../domain/reward.ts";
 
 export enum SpendAction {
     SpendForCoins,    // means lose a specific amount of that collectible and convert it to coins
@@ -64,7 +64,7 @@ export class BinGoInventory extends LitElement {
         }
 
         const parts = reward.partsToAWhole * amount
-        storage.changeAmount(reward.key, Operation.Substract, parts)
+        storage.changeAmount(reward.key, Operation.Subtract, parts)
 
         if (action === SpendAction.SpendForCoins) {
             const value = reward.value || 0;

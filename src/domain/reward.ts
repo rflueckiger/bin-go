@@ -11,7 +11,7 @@ export enum RewardType {
 }
 
 export interface Reward {
-    type: string
+    type: RewardType
     key: string
     icon: string
     description?: string
