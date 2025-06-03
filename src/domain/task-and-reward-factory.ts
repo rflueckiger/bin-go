@@ -32,7 +32,9 @@ export class TaskAndRewardFactory {
             min: 1,
             max: 8,
             partsToAWhole: 1,
-            rarity: Rarity.Common
+            rarity: Rarity.Common,
+            shelfLife: 0,
+            value: 1
         }
     }
 

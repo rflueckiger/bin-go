@@ -1,7 +1,13 @@
-import {css, html, LitElement} from 'lit'
-import {customElement, property, state, query} from 'lit/decorators.js'
-import {Inventory, Rarity, storage} from "../storage.ts";
+import {css, html, LitElement, nothing} from 'lit'
+import {customElement, property, query, state} from 'lit/decorators.js'
+import {Inventory, Operation, Rarity, storage, UNIQUE_REWARD_KEY_COINS} from "../storage.ts";
 import {Reward} from "../domain/reward.ts";
+
+export enum SpendAction {
+    SpendForCoins,    // means lose a specific amount of that item and convert it to coins
+    SpendForEffect    // means lose a specific amount of that item and use it in its intended way
+                          // (which is usually outside the app, so it means just reducing the item count)
+}
 
 @customElement('bin-go-inventory')
 export class BinGoInventory extends LitElement {
@@ -35,31 +41,40 @@ export class BinGoInventory extends LitElement {
     dialog!: HTMLElement
 
     render() {
-        if (this.inventory.items.length === 0 && this.inventory.coins <= 0) {
+        if (this.inventory.rewards.length <= 0) {
             return html`No rewards collected yet`
         } else {
             return html`
                 <div class="items-layout">
-                    ${this.renderCoins(this.inventory.coins)}
-                    ${this.inventory.items.sort(this.rewardSorter).map(reward => this.renderItem(reward))}
+                    ${this.inventory.rewards.sort(this.rewardSorter).map(reward => this.renderItem(reward))}
                 </div>
                 <sl-dialog class="dialog" no-header>
                     <div class="dialog-title">${this.selectedReward?.icon}</div>
                     <div class="dialog-text amount">${this.selectedReward?.amount} / ${this.selectedReward?.partsToAWhole}</div>
-                    <button ?disabled="${this.maxSpendAmount(this.selectedReward) <= 0}" @click="${() => this.redeemReward(this.selectedReward, 1)}">1 Einlösen</button>
+                    <button ?disabled="${this.maxSpendAmount(this.selectedReward) <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForEffect, 1)}">1 Einlösen</button>
+                    ${this.selectedReward?.key !== UNIQUE_REWARD_KEY_COINS ? html`<button ?disabled="${this.maxSpendAmount(this.selectedReward) <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForCoins, 1)}">1 Verkaufen</button>` : nothing}
                 </sl-dialog>
             `
         }
     }
 
-    private redeemReward(reward: Reward | undefined, amount: number) {
+    private spendReward(reward: Reward | undefined, action: SpendAction, amount: number) {
         if (!reward || this.maxSpendAmount(reward) < amount) {
             return;
         }
 
-        reward.amount = reward.amount -= reward.partsToAWhole * amount;
-        storage.updateRewardAmount(reward.key, reward.amount)
+        const parts = reward.partsToAWhole * amount
+        storage.changeAmount(reward.key, Operation.Substract, parts)
+
+        if (action === SpendAction.SpendForCoins) {
+            const value = reward.value || 0;
+            const coins = value * amount;
+            storage.changeAmount(UNIQUE_REWARD_KEY_COINS, Operation.Add, coins)
+        }
+
         this.inventory = storage.getInventory()
+        this.selectedReward = undefined;
+        (this.dialog as any).hide()
         this.requestUpdate()
     }
 
@@ -87,15 +102,6 @@ export class BinGoInventory extends LitElement {
             case Rarity.Common: return 3;
             default: return 5;
         }
-    }
-
-    private renderCoins(amount: number) {
-        return html`<div class="item-container ${Rarity.Common}">
-            <div class="icon">🪙</div>
-            <div class="amount-container">
-                <span class="amount">${amount}</span>
-            </div>
-        </div>`
     }
 
     private renderItem(reward: Reward) {

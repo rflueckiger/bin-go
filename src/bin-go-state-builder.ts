@@ -85,6 +85,8 @@ export class BinGoStateBuilder {
                 amount: this.getAmount(rewardSpec),
                 partsToAWhole: rewardSpec.partsToAWhole,
                 owner: rewardSpec.owner,
+                value: rewardSpec.value,
+                shelfLife: rewardSpec.shelfLife
             }
         }
     }

@@ -9,4 +9,6 @@ export interface Reward {
     amount: number
     partsToAWhole: number
     owner?: string
+    value?: number
+    shelfLife?: number
 }

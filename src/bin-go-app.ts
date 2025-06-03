@@ -46,8 +46,7 @@ export class BinGoApp extends LitElement {
             width: 100%;
         }  `
 }
-
-declare global {
+ declare global {
     interface HTMLElementTagNameMap {
         'bin-go-app': BinGoApp
     }

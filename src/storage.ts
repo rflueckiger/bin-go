@@ -31,11 +31,33 @@ export interface RewardSpec {
     rarity: Rarity;     // the rarity of the item
     icon: string;       // emoji to represent the reward, support 1 character
     owner?: string;     // marks that this reward is gifted by someone else and can't be edited
+    value?: number;      // the value in coins of 1 item
+    shelfLife?: number;  // undefined = does never expire, 0 = expires when collected (gets converted into coins)
+                        // TODO: shelf life unit of actual values not yet defined and not yet supported
 }
 
 export interface Inventory {
-    items: Reward[]
-    coins: number
+    rewards: Reward[]
+}
+
+export enum Operation {
+    Add = 1,
+    Substract = -1
+}
+
+export const UNIQUE_REWARD_KEY_COINS = 'coins'
+
+export const createUniqueRewardCoins = (coins: number)  => {
+    return {
+        type: 'unique',
+        key: UNIQUE_REWARD_KEY_COINS,
+        amount: coins,
+        value: 1,
+        rarity: Rarity.Common,
+        icon: '🪙',
+        partsToAWhole: 1,
+        description: 'Hobby Investment Coins'
+    }
 }
 
 export class Storage {
@@ -139,8 +161,7 @@ export class Storage {
         }
 
         const emptyInventory = {
-            coins: 0,
-            items: []
+            rewards: [ createUniqueRewardCoins(0) ]
         }
         localStorage.setItem('inventory', JSON.stringify(emptyInventory));
         return emptyInventory;
@@ -158,22 +179,25 @@ export class Storage {
         }
 
         rewards.forEach(reward => {
-            if (reward.type === 'coins') {
-                inventory.coins += reward.amount
-            } else {
-                const existingItems = inventory.items.find(item => item.key === reward.key)
+            if (reward.shelfLife === undefined || reward.shelfLife > 0) {
+                const existingItems = inventory.rewards.find(r => r.key === reward.key)
                 if (existingItems) {
                     existingItems.amount += reward.amount
 
-                    // update other properties, the item might have received an overhaul in the meantime
                     existingItems.icon = reward.icon
                     existingItems.description = reward.description
                     existingItems.rarity = reward.rarity
                     existingItems.partsToAWhole = reward.partsToAWhole
                     existingItems.owner = reward.owner
+                    existingItems.value = reward.value
+                    existingItems.shelfLife = reward.shelfLife
                 } else {
-                    inventory.items.push(reward)
+                    inventory.rewards.push(reward)
                 }
+            } else {
+                // collectibles with shelfLife <= 0 cannot be stored, they must be spent immediately
+                // currently conversion is the only available option
+                this.convertRewardToCoins(inventory, reward)
             }
         })
 
@@ -181,12 +205,31 @@ export class Storage {
         this.inventoryListeners.forEach(listener => listener())
     }
 
-    public updateRewardAmount(key: string, amount: number) {
-        console.log(`Updating amount of reward "${key}" to ${amount}`)
+    private convertRewardToCoins(inventory: Inventory, reward: Reward) {
+        if (!reward.value || reward.value <= 0) {
+            // item has no value and is therefore lost without getting coins
+            console.log(`Reward ${reward.key} is not converted to coins, since it has no value.`)
+            return;
+        }
+
+        // item has a value and can therefore be converted to coins
+        const coins = Math.floor(reward.amount / reward.partsToAWhole) * reward.value
+        const coinsItem = inventory.rewards.find(r => r.key === UNIQUE_REWARD_KEY_COINS)
+        if (!coinsItem) {
+            inventory.rewards.push(createUniqueRewardCoins(coins))
+        } else {
+            coinsItem.amount += coins
+        }
+        console.log(`Reward ${reward.key} is converted to ${coins} coins.`)
+    }
+
+    public changeAmount(rewardKey: string, operation: Operation, amount: number) {
+        const difference = operation * Math.max(0, amount)
+        console.log(`Updating amount of reward "${rewardKey}" by ${difference}`)
         const inventory = this.getInventory()
-        const existingReward = inventory.items.find(r => r.key == key)
+        const existingReward = inventory.rewards.find(r => r.key === rewardKey)
         if (existingReward) {
-            existingReward.amount = amount
+            existingReward.amount += difference
             localStorage.setItem('inventory', JSON.stringify(inventory))
         }
     }

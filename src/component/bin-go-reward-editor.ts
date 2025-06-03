@@ -40,7 +40,9 @@ export class BinGoRewardEditor extends LitElement {
                         <div class="label">Max</div>
                         <input class="reward-max field-number" .value=${rewardSpec.max} @input=${this.updateNumberInputHandler(rewardSpec, 'max')}/>
                         <div class="label">Teile für ein Ganzes</div>
-                        <input class="reward-partsToAWhole field-number" .value=${rewardSpec.partsToAWhole} @input=${this.updateNumberInputHandler(rewardSpec, 'partsToAWhole')}/>    
+                        <input class="reward-partsToAWhole field-number" .value=${rewardSpec.partsToAWhole} @input=${this.updateNumberInputHandler(rewardSpec, 'partsToAWhole')}/>
+                        <div class="label">Coins</div>
+                        <input class="reward-value field-number" .value=${rewardSpec.value} @input=${this.updateNumberInputHandler(rewardSpec, 'value')}/>
                     </div>
                     <div class="actions">
                         <a href="#" @click="${this.done}">Done</a>
