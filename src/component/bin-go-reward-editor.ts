@@ -2,7 +2,7 @@ import {LitElement, css, html, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
 import {RewardSpec, RewardSpecType} from "../storage.ts";
 import {Rarity} from "../domain/reward.ts";
-import {LinearAmountFunction} from "../domain/functions/linear-amount-function.ts";
+import {AmountDistributionSimulator} from "../simulation/amount-distribution-simulator.ts";
 
 @customElement('bin-go-reward-editor')
 export class BinGoRewardEditor extends LitElement {
@@ -12,6 +12,8 @@ export class BinGoRewardEditor extends LitElement {
 
     @property()
     public editing = false;
+
+    private amountDistributionSimulator = new AmountDistributionSimulator();
 
     render() {
         switch (this.rewardSpec?.type) {
@@ -37,9 +39,9 @@ export class BinGoRewardEditor extends LitElement {
                                 return html`<option value="${value}" ?selected="${value === rewardSpec.rarity}">${key}</option>`  
                             })}
                         </select>
-                        <div class="label has-action" @click="${() => this.getProbabilityPreview(rewardSpec)}">Min</div>
+                        <div class="label has-action" @click="${() => this.amountDistributionSimulator.getAmountDistribution(rewardSpec)}">Min</div>
                         <input class="reward-min field-number" .value=${rewardSpec.min} @input=${this.updateNumberInputHandler(rewardSpec, 'min')}/>
-                        <div class="label has-action" @click="${() => this.getProbabilityPreview(rewardSpec)}">Max</div>
+                        <div class="label has-action" @click="${() => this.amountDistributionSimulator.getAmountDistribution(rewardSpec)}">Max</div>
                         <input class="reward-max field-number" .value=${rewardSpec.max} @input=${this.updateNumberInputHandler(rewardSpec, 'max')}/>
                         <div class="label">Teile für ein Ganzes</div>
                         <input class="reward-partsToAWhole field-number" .value=${rewardSpec.partsToAWhole} @input=${this.updateNumberInputHandler(rewardSpec, 'partsToAWhole')}/>
@@ -126,80 +128,6 @@ export class BinGoRewardEditor extends LitElement {
             object[property] = Number(target.value)
             this.requestUpdate()
         }
-    }
-
-    private getProbabilityPreview(rewardSpec: RewardSpec) {
-        const min = rewardSpec.min
-        const max = rewardSpec.max
-        const diff = rewardSpec.max - rewardSpec.min
-
-        console.log(`Probability preview for '${rewardSpec.icon} (${rewardSpec.key})' [${min},${max}]:`)
-        if (diff === 0) {
-            console.log(`  ${min} - 100%`)
-            return;
-        }
-
-        const amountFunction= new LinearAmountFunction()
-
-        const samples: number[] = []
-        const sampleSize = 5000
-
-        // create samples
-        for (let i = 0; i < sampleSize; i++) {
-            samples.push(amountFunction.getAmount(min, max))
-        }
-
-        // group samples
-        type Stat = { min: number, max: number, label: string, count: number, percentage: number }
-        const groupedSamples: Map<number, Stat> = new Map()
-        samples.forEach(sample => {
-            const stat = groupedSamples.get(sample)
-            if (stat) {
-                stat.count += 1
-            } else {
-                groupedSamples.set(sample, { min: sample, max: sample, label: sample.toString(), count: 1, percentage: 0 })
-            }
-        })
-
-        // sort samples in ascending order by value
-        const stats = Array
-            .from(groupedSamples, ([value, stat]) => ({ value, stat }))
-            .sort((a, b) => a.value - b.value)
-            .map((sample) => sample.stat);
-
-        const maxStats = 10
-        let mergedStats: Stat[] = [...stats]
-        while (mergedStats.length > maxStats) {
-            const next: Stat[] = [];
-            for (let i = 0; i < mergedStats.length; i += 2) {
-                if (i + 1 < mergedStats.length) {
-                    const min = mergedStats[i].min
-                    const max = mergedStats[i + 1].max
-                    next.push({
-                        count: mergedStats[i].count + mergedStats[i + 1].count,
-                        min,
-                        max,
-                        label: min === max ? min.toString() : `${min}-${max}`,
-                        percentage: 0
-                    });
-                } else {
-                    next.push(mergedStats[i]);
-                }
-            }
-            mergedStats = next;
-        }
-
-        // calculate percentages
-        mergedStats.forEach(stat => stat.percentage = stat.count / sampleSize)
-
-        // TODO: instead of printing, show stats in table in overlay
-
-        // print
-        const maxWidth = mergedStats.reduce((a, b) => b.label.length > a ? b.label.length : a, 0)
-        mergedStats.forEach(stat => {
-            console.log(` ${stat.label.padStart(maxWidth)}: ${(stat.percentage * 100).toFixed(1).toString().padStart(4)}%`)
-        })
-
     }
 
     static styles = css`

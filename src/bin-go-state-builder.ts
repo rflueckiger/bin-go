@@ -3,13 +3,13 @@ import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
 import {Rarity, Reward, RewardType} from "./domain/reward.ts";
-import {LinearAmountFunction} from "./domain/functions/linear-amount-function.ts";
+import {LinearDecayAmountFunction} from "./domain/functions/linear-decay-amount-function.ts";
 
 export class BinGoStateBuilder {
 
     private readonly config: AppConfig;
 
-    private readonly amountFunction = new LinearAmountFunction();
+    private readonly amountFunction = new LinearDecayAmountFunction();
 
     constructor(config: AppConfig) {
         this.config = config;
