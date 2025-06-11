@@ -43,8 +43,8 @@ export class Storage {
     public rarityChances: { [key in Rarity]: number } = {
         [Rarity.Epic]: 5,
         [Rarity.Rare]: 50,
-        [Rarity.Uncommon]: 250,
-        [Rarity.Common]: 695
+        [Rarity.Uncommon]: 200,
+        [Rarity.Common]: 350
     }
 
     private collectionChangeListeners: (() => void)[] = []

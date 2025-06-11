@@ -55,7 +55,8 @@ export class BinGoEditPage extends LitElement {
             <h3 class="title">Belohnungen</h3>
             <div class="foldable">
                 <div class="paragraph">Hier kannst du deine Belohnungen erfassen. Belohnungen gehören jeweils zu einer von 4 Raritätsstufen: Common, Uncommon, Rare und Epic</div>
-                <div class="paragraph">Unten siehst du jeweils wie gross die Chance ist, dass eine Belohnung einer bestimmten Gruppe erscheint.
+                <div class="paragraph">Eine Belohnung der Gruppe Common erhältst du immer!</div>
+                <div class="paragraph">Unten siehst du jeweils wie gross die Chance ist, dass zusätzlich eine Belohnung einer bestimmten Gruppe erscheint.
                     Innerhalb einer Gruppe ist die Chance dann jeweils für alle Belohnungen gleich.</div>
                 <div class="paragraph">Idealerweise erfasst für jede Gruppe mindestens 3-4 Belohnungen um das Spiel spannend zu halten.</div>
             </div>

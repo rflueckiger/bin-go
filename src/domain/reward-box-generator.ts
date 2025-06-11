@@ -15,33 +15,48 @@ export class RewardBoxGenerator {
 
     public generate(): RewardBox {
         const rewards: Reward[] = []
+
+        // basic reward
+        const commonReward = this.getRandomReward(this.rewardSpecs, Rarity.Common);
+        if (commonReward) {
+            rewards.push(commonReward)
+        }
+
+        // additional rewards
         this.generateRewards(rewards)
+
         return new RewardBox(rewards)
     }
 
-    private generateRewards(rewards: Reward[], maxRolls = 3, roll = 1) {
+    private generateRewards(rewards: Reward[], maxRolls = 2, roll = 1) {
         //   1. roll for rarity, then pick 1 reward from that type randomly from the config
         //   2. if epic/rare inside this loot box is done
         //   3. otherwise repeat for a maximum of 3 times total
 
         const rarity = this.getRarity();
-        const reward = this.getRandomReward(this.rewardSpecs, rarity);
-
-        if (reward) {
-            rewards.push(reward)
-
-            // max tries reached?
-            if (roll >= maxRolls) {
-                return
-            }
-
-            // maybe one more reward?
-            if ((reward.rarity === Rarity.Uncommon || reward.rarity === Rarity.Common)
-                && this.randomInt(0, 5) < 2) { // one more rewards in 2/5 of cases
-
-                this.generateRewards(rewards, maxRolls, roll + 1)
+        if (rarity != null) {
+            const reward = this.getRandomReward(this.rewardSpecs, rarity);
+            if (reward) {
+                rewards.push(reward)
             }
         }
+
+        // max tries reached?
+        if (roll >= maxRolls) {
+            return
+        }
+
+        // already epic or rare rewards?
+        if (rewards.filter(r => r.rarity === Rarity.Epic || r.rarity === Rarity.Rare).length > 0) {
+            return
+        }
+
+        // chance of 2 in 5 to get additional rewards
+        if (this.randomInt(0, 5) >= 2) {
+            return
+        }
+
+        this.generateRewards(rewards, maxRolls, roll + 1)
     }
 
     private getRandomReward(rewardSpecs: RewardSpec[], rarity: Rarity): Reward | null {
@@ -90,12 +105,13 @@ export class RewardBoxGenerator {
         else return undefined
     }
 
-    private getRarity(): Rarity {
+    private getRarity(): Rarity | null {
         const roll = this.randomInt(0, 999);
         if (roll < this.sumRarityChance([Rarity.Epic])) { return Rarity.Epic }
         else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare])) { return Rarity.Rare }
         else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare, Rarity.Uncommon])) { return Rarity.Uncommon }
-        else return Rarity.Common
+        else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare, Rarity.Uncommon, Rarity.Common])) { return Rarity.Common }
+        else return null
     }
 
     private sumRarityChance(rarities: Rarity[]): number {
