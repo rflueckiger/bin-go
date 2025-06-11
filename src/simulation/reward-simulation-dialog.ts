@@ -17,6 +17,9 @@ export class RewardSimulationDialog extends LitElement {
     @state()
     private preview?: RewardSimulationResult
 
+    @state()
+    private picks = 0
+
     private rewardSimulation = new RewardSimulation()
 
     render() {
@@ -39,6 +42,12 @@ export class RewardSimulationDialog extends LitElement {
         }
 
         return html`
+            <div class="pick-control">
+                <a href="#" @click="${() => this.picks = Math.max(0, this.picks - 1)}">&lt;</a>
+                <span>Reihen/Spalten pro Woche: ${this.picks + 1}</span>
+                <a href="#" @click="${() => this.picks = Math.min(this.picks + 1, this.preview!.seriesCount - 1 || 0)}">&gt;</a>
+            </div>
+            
             <table class="preview-table">
                 <thead>
                     <td class="header-cell reward">Belohnung</td>
@@ -46,7 +55,7 @@ export class RewardSimulationDialog extends LitElement {
                     <td class="header-cell number">Pro Woche</td>
                 </thead>
                 <tbody>
-                    ${this.preview.result[0].collection.getContent().map(reward => {
+                    ${this.preview.result[this.picks].collection.getContent().map(reward => {
                         const total = Number((reward.amount / reward.partsToAWhole).toFixed(1));
                         const perWeek = Number((total / this.preview!.seriesSize).toFixed(1))
                         
