@@ -1,9 +1,11 @@
 import {css, html, LitElement, nothing} from 'lit'
-import {customElement, state} from 'lit/decorators.js'
+import {customElement, query, state} from 'lit/decorators.js'
 import {RewardSpec, storage, Task} from "../storage.ts";
 import '../component/bin-go-reward-editor.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {Rarity} from "../domain/reward.ts";
+import '../simulation/reward-simulation-dialog.ts';
+import {RewardSimulationDialog} from "../simulation/reward-simulation-dialog.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -21,6 +23,9 @@ export class BinGoEditPage extends LitElement {
 
     @state()
     private adding?: RewardSpec = undefined
+
+    @query('#simulation-dialog')
+    simulationDialog!: HTMLElement
 
     constructor() {
         super();
@@ -64,8 +69,15 @@ export class BinGoEditPage extends LitElement {
 
             <div class="action-bar">
                 <a class="link" href="#" @click="${this.done}">Fertig</a>
+                <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
             </div>
+            
+            <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
         `
+    }
+
+    private showPreview() {
+        (this.simulationDialog as RewardSimulationDialog).showPreview(this.rewardSpecs)
     }
 
     private renderRewardGroup(rarity: Rarity) {
@@ -79,6 +91,7 @@ export class BinGoEditPage extends LitElement {
                         <div class="list-item reward-item">
                             <bin-go-reward-editor .rewardSpec="${spec}" .editing="${this.editing === spec}" @done="${(event: CustomEvent) => {
                             event.stopPropagation()
+                            this.save()
                             this.editing = undefined
                         }}">
                             </bin-go-reward-editor>
@@ -115,7 +128,6 @@ export class BinGoEditPage extends LitElement {
         event.stopPropagation()
         this.rewardSpecs.push(event.detail)
         this.adding = undefined
-        this.save();
         this.requestUpdate()
     }
 
@@ -136,7 +148,6 @@ export class BinGoEditPage extends LitElement {
     }
 
     private done() {
-        this.save();
         this.sendDone();
     }
 

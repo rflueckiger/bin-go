@@ -10,7 +10,7 @@ import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
 import '../component/bin-go-inventory.ts';
-import {Rarity} from "../domain/reward.ts";
+import {RewardBoxQuality} from "../domain/reward-box.ts";
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -21,7 +21,7 @@ export class BinGoPlayPage extends LitElement {
     constructor() {
         super();
 
-        const state = storage.getState()
+        const state = storage.loadState()
         if (state && !this.hasExpired(state)) {
             this.state = state
         } else {
@@ -98,15 +98,10 @@ export class BinGoPlayPage extends LitElement {
             const rewardCellState = cellState as RewardCellState
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    ${!rewardCellState.marked ? html`<div class="label">${this.isSpecialRewardCell(rewardCellState) ? '📦📦' : '📦'}</div>` : nothing }
+                    ${!rewardCellState.marked ? html`<div class="label">${rewardCellState.rewardBox.getQuality() === RewardBoxQuality.superior ? '📦📦' : '📦'}</div>` : nothing }
                 </div>`
         }
         return nothing
-    }
-
-    private isSpecialRewardCell(rewardCellState: RewardCellState): boolean {
-        return rewardCellState.rewards.length > 2
-            || rewardCellState.rewards.filter(reward => reward.rarity === Rarity.Epic || reward.rarity === Rarity.Rare).length > 0
     }
 
     private marked() {
@@ -126,7 +121,7 @@ export class BinGoPlayPage extends LitElement {
         [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[4]));
         [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[5]));
 
-        storage.updateState(this.state)
+        storage.saveState(this.state)
         this.requestUpdate()
     }
 
@@ -135,7 +130,7 @@ export class BinGoPlayPage extends LitElement {
             return
         }
         rewardCellState.marked = true
-        storage.updateInventory(rewardCellState.rewards)
+        storage.updateInventory(rewardCellState.rewardBox.getContent())
         this.requestUpdate()
     }
 
@@ -148,7 +143,7 @@ export class BinGoPlayPage extends LitElement {
             throw new Error('IllegalStateException')
         }
         this.state = new BinGoStateBuilder(config).createState()
-        storage.updateState(this.state)
+        storage.saveState(this.state)
     }
 
     private sendEdit() {

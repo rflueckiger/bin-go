@@ -1,0 +1,108 @@
+import {Rarity, Reward, RewardType} from "./reward.ts";
+import {RewardSpec, storage} from "../storage.ts";
+import {LinearDecayAmountFunction} from "./functions/linear-decay-amount-function.ts";
+import {RewardBox} from "./reward-box.ts";
+
+export class RewardBoxGenerator {
+
+    private readonly rewardSpecs: RewardSpec[];
+
+    private readonly amountFunction = new LinearDecayAmountFunction();
+
+    public constructor(rewardSpecs: RewardSpec[]) {
+        this.rewardSpecs = rewardSpecs;
+    }
+
+    public generate(): RewardBox {
+        const rewards: Reward[] = []
+        this.generateRewards(rewards)
+        return new RewardBox(rewards)
+    }
+
+    private generateRewards(rewards: Reward[], maxRolls = 3, roll = 1) {
+        //   1. roll for rarity, then pick 1 reward from that type randomly from the config
+        //   2. if epic/rare inside this loot box is done
+        //   3. otherwise repeat for a maximum of 3 times total
+
+        const rarity = this.getRarity();
+        const reward = this.getRandomReward(this.rewardSpecs, rarity);
+
+        if (reward) {
+            rewards.push(reward)
+
+            // max tries reached?
+            if (roll >= maxRolls) {
+                return
+            }
+
+            // maybe one more reward?
+            if ((reward.rarity === Rarity.Uncommon || reward.rarity === Rarity.Common)
+                && this.randomInt(0, 5) < 2) { // one more rewards in 2/5 of cases
+
+                this.generateRewards(rewards, maxRolls, roll + 1)
+            }
+        }
+    }
+
+    private getRandomReward(rewardSpecs: RewardSpec[], rarity: Rarity): Reward | null {
+        const matchingRewardSpecs = rewardSpecs.filter(spec => spec.rarity === rarity)
+        if (matchingRewardSpecs.length > 0) {
+            const randomIndex = this.randomInt(0, matchingRewardSpecs.length - 1)
+            return this.createReward(matchingRewardSpecs[randomIndex])
+        }
+
+        const lowerRarity = this.getNextLowerRarity(rarity)
+        if (lowerRarity) {
+            return this.getRandomReward(rewardSpecs, lowerRarity)
+        }
+
+        return null
+    }
+
+    private createReward(rewardSpec: RewardSpec): Reward {
+        switch (rewardSpec.type) {
+            default: return {
+                type: RewardType.Collectible,
+                key: rewardSpec.key,
+                icon: rewardSpec.icon,
+                description: rewardSpec.description,
+                rarity: rewardSpec.rarity,
+                amount: this.getAmount(rewardSpec),
+                partsToAWhole: rewardSpec.partsToAWhole,
+                owner: rewardSpec.owner,
+                value: rewardSpec.value,
+                shelfLife: rewardSpec.shelfLife
+            }
+        }
+    }
+
+    private getAmount(rewardSpec: RewardSpec): number {
+        if (rewardSpec.min !== rewardSpec.max) {
+            return this.amountFunction.getAmount(rewardSpec.min, rewardSpec.max)
+        }
+        return rewardSpec.min
+    }
+
+    private getNextLowerRarity(rarity: Rarity): Rarity | undefined {
+        if (rarity === Rarity.Epic) { return Rarity.Rare }
+        else if (rarity === Rarity.Rare) { return Rarity.Uncommon }
+        else if (rarity === Rarity.Uncommon) { return Rarity.Common }
+        else return undefined
+    }
+
+    private getRarity(): Rarity {
+        const roll = this.randomInt(0, 999);
+        if (roll < this.sumRarityChance([Rarity.Epic])) { return Rarity.Epic }
+        else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare])) { return Rarity.Rare }
+        else if (roll < this.sumRarityChance([Rarity.Epic, Rarity.Rare, Rarity.Uncommon])) { return Rarity.Uncommon }
+        else return Rarity.Common
+    }
+
+    private sumRarityChance(rarities: Rarity[]): number {
+        return rarities.map(r => storage.rarityChances[r]).reduce((sum, chance) => sum + chance)
+    }
+
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+}

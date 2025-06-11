@@ -1,6 +1,8 @@
 import {BoardState} from "./domain/board-state.ts";
 import {CellState} from "./domain/cell-state.ts";
-import {Rarity, Reward, RewardType} from "./domain/reward.ts";
+import {Rarity, Reward} from "./domain/reward.ts";
+import {Operation, RewardCollection} from "./domain/reward-collection.ts";
+import {RewardBox} from "./domain/reward-box.ts";
 
 export interface AppConfig {
     version: number;
@@ -34,30 +36,6 @@ export interface RewardSpec {
                         // TODO: shelf life unit of actual values not yet defined and not yet supported
 }
 
-export interface Inventory {
-    rewards: Reward[]
-}
-
-export enum Operation {
-    Add = 1,
-    Subtract = -1
-}
-
-export const UNIQUE_REWARD_KEY_COINS = 'coins'
-
-export const createUniqueRewardCoins = (coins: number)  => {
-    return {
-        type: RewardType.Unique,
-        key: UNIQUE_REWARD_KEY_COINS,
-        amount: coins,
-        value: 1,
-        rarity: Rarity.Common,
-        icon: '🪙',
-        partsToAWhole: 1,
-        description: 'Hobby Investment Coin'
-    }
-}
-
 export class Storage {
 
     public static VERSION = 1;
@@ -69,14 +47,14 @@ export class Storage {
         [Rarity.Common]: 695
     }
 
-    private inventoryListeners: (() => void)[] = []
+    private collectionChangeListeners: (() => void)[] = []
 
-    public addInventoryListener(listener: () => void) {
-        this.inventoryListeners.push(listener)
+    public addCollectionChangeListener(listener: () => void) {
+        this.collectionChangeListeners.push(listener)
     }
 
-    public removeInventoryListener(listener: () => void) {
-        this.inventoryListeners.splice(this.inventoryListeners.indexOf(listener), 1)
+    public removeCollectionChangeListener(listener: () => void) {
+        this.collectionChangeListeners.splice(this.collectionChangeListeners.indexOf(listener), 1)
     }
 
     public getConfig(): AppConfig | undefined {
@@ -109,34 +87,28 @@ export class Storage {
         localStorage.setItem('config', JSON.stringify(config));
     }
 
-    public getState(): BoardState | undefined {
-        console.log('Reading state...')
-        const strState = localStorage.getItem('state');
-
-        if (strState) {
-            const state = JSON.parse(strState)
-            console.log(state)
-            const stateVersion = Number(state.version);
-            if (stateVersion === Storage.VERSION) {
-                return state;
-            } else {
-                console.log(`State version mismatch detected (version=${stateVersion}). Current version=${Storage.VERSION}. State migration necessary...`)
-                throw new Error('StorageMigrationError')
-            }
+    public loadState(): BoardState | undefined {
+        const serializedStateData = localStorage.getItem('state');
+        if (serializedStateData) {
+            return JSON.parse(serializedStateData, (key, value) => {
+                // reward box needs to be revived as a class instance
+                if (key === 'rewardBox') {
+                    return new RewardBox(value.rewards)
+                }
+                return value;
+            })
         }
-
-        console.log('No state found.')
         return undefined;
     }
 
-    public updateState(state: BoardState) {
+    public saveState(state: BoardState) {
         // TODO: validate / sanitize input
         localStorage.setItem('state', JSON.stringify(state));
     }
 
     public updateCellState(cellState: CellState) {
         console.log(`Updating state of cell (${cellState.id}) ...`)
-        const state = this.getState();
+        const state = this.loadState();
         if (!state) {
             throw new Error('IllegalStateError')
         }
@@ -147,88 +119,49 @@ export class Storage {
         }
 
         existingCellState.marked = cellState.marked
-        this.updateState(state);
+        this.saveState(state);
     }
 
-    public getInventory(): Inventory {
-        console.log('Reading inventory...')
-        const strInventory = localStorage.getItem('inventory');
+    public loadCollection(): RewardCollection {
+        const serializedCollectionData = localStorage.getItem('collection');
 
-        if (strInventory) {
-            return JSON.parse(strInventory)
+        // no collection exists yet
+        if (!serializedCollectionData) {
+            return this.saveCollection(new RewardCollection())
         }
 
-        const emptyInventory = {
-            rewards: [ createUniqueRewardCoins(0) ]
-        }
-        localStorage.setItem('inventory', JSON.stringify(emptyInventory));
-        return emptyInventory;
+        const collectionData = JSON.parse(serializedCollectionData)
+        return new RewardCollection(collectionData.rewards)
+    }
+
+    public saveCollection(collection: RewardCollection): RewardCollection {
+        localStorage.setItem('collection', JSON.stringify({
+            rewards: collection.getContent()
+        }))
+        return collection
     }
 
     public updateInventory(rewards: Reward[]) {
-        // TODO: show collected rewards to user
-
-        console.log('Collecting rewards:')
-        rewards.forEach(reward => { console.log(`- ${JSON.stringify(reward)}`) })
-
-        const inventory = this.getInventory()
-        if (!inventory) {
-            throw new Error('Cannot update inventory, because inventory could not be loaded.')
+        const collection = this.loadCollection()
+        if (!collection) {
+            throw new Error('Cannot update collection, because collection could not be loaded.')
         }
 
-        rewards.forEach(reward => {
-            if (reward.shelfLife === undefined || reward.shelfLife > 0) {
-                const existingReward = inventory.rewards.find(r => r.key === reward.key)
-                if (existingReward) {
-                    existingReward.amount += reward.amount
-
-                    existingReward.icon = reward.icon
-                    existingReward.description = reward.description
-                    existingReward.rarity = reward.rarity
-                    existingReward.partsToAWhole = reward.partsToAWhole
-                    existingReward.owner = reward.owner
-                    existingReward.value = reward.value
-                    existingReward.shelfLife = reward.shelfLife
-                } else {
-                    inventory.rewards.push(reward)
-                }
-            } else {
-                // collectibles with shelfLife <= 0 cannot be stored, they must be spent immediately
-                // currently conversion is the only available option
-                this.convertRewardToCoins(inventory, reward)
-            }
-        })
-
-        localStorage.setItem('inventory', JSON.stringify(inventory));
-        this.inventoryListeners.forEach(listener => listener())
-    }
-
-    private convertRewardToCoins(inventory: Inventory, reward: Reward) {
-        if (!reward.value || reward.value <= 0) {
-            // reward has no value and is therefore lost without getting coins
-            console.log(`Reward ${reward.key} is not converted to coins, since it has no value.`)
-            return;
-        }
-
-        // reward has a value and can therefore be converted to coins
-        const coins = Math.floor(reward.amount / reward.partsToAWhole) * reward.value
-        const coinsReward = inventory.rewards.find(r => r.key === UNIQUE_REWARD_KEY_COINS)
-        if (!coinsReward) {
-            inventory.rewards.push(createUniqueRewardCoins(coins))
-        } else {
-            coinsReward.amount += coins
-        }
-        console.log(`Reward ${reward.key} is converted to ${coins} coins.`)
+        collection.merge(rewards)
+        this.saveCollection(collection)
+        this.collectionChangeListeners.forEach(listener => listener())
     }
 
     public changeAmount(rewardKey: string, operation: Operation, amount: number) {
-        const difference = operation * Math.max(0, amount)
-        console.log(`Updating amount of reward "${rewardKey}" by ${difference}`)
-        const inventory = this.getInventory()
-        const existingReward = inventory.rewards.find(r => r.key === rewardKey)
-        if (existingReward) {
-            existingReward.amount += difference
-            localStorage.setItem('inventory', JSON.stringify(inventory))
+        const collection = this.loadCollection()
+        if (!collection) {
+            throw new Error('Cannot update collection, because collection could not be loaded.')
+        }
+
+        const success = collection.updateAmount(rewardKey, operation, amount)
+        if (success) {
+            this.saveCollection(collection)
+            this.collectionChangeListeners.forEach(listener => listener())
         }
     }
 

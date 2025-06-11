@@ -1,12 +1,12 @@
 import {CellState} from "./cell-state.ts";
-import {Reward} from "./reward.ts";
+import {RewardBox} from "./reward-box.ts";
 
 export class RewardCellState extends CellState {
-    public readonly rewards: Reward[];
+    public readonly rewardBox: RewardBox;
 
-    constructor(id: number, rewards: Reward[]) {
+    constructor(id: number, rewardBox: RewardBox) {
         super(id, 'reward');
 
-        this.rewards = rewards;
+        this.rewardBox = rewardBox;
     }
 }
