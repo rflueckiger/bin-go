@@ -91,9 +91,9 @@ export class BinGoEditPage extends LitElement {
                         return html`
                         <div class="list-item reward-item">
                             <bin-go-reward-editor .rewardSpec="${spec}" .editing="${this.editing === spec}" @done="${(event: CustomEvent) => {
-                            event.stopPropagation()
-                            this.save()
-                            this.editing = undefined
+                                event.stopPropagation()
+                                this.save()
+                                this.editing = undefined
                         }}">
                             </bin-go-reward-editor>
                             ${!this.editing && !this.adding && !spec.owner ? html`<a href="#" @click="${() => this.editing = spec}">Ändern</a>` : nothing }
@@ -122,12 +122,14 @@ export class BinGoEditPage extends LitElement {
 
     private removeReward(rewardSpec: RewardSpec) {
         this.rewardSpecs.splice(this.rewardSpecs.indexOf(rewardSpec), 1)
+        this.save()
         this.requestUpdate()
     }
 
     private addNewRewardSpec(event: CustomEvent) {
         event.stopPropagation()
         this.rewardSpecs.push(event.detail)
+        this.save()
         this.adding = undefined
         this.requestUpdate()
     }
@@ -135,16 +137,19 @@ export class BinGoEditPage extends LitElement {
     private renderTaskRow(task: Task) {
         return html`
             <div class="list-item task-item">
-                <input class="task-icon" .value="${task.icon}" @input=${this.inputToObjectUpdateHandler(task, 'icon')}/>
+                <input class="task-icon" .value="${task.icon}" @input=${this.inputToObjectUpdateHandler(task, 'icon', () => {
+                    this.save()
+                    this.requestUpdate()
+                })}/>
             </div>
         `
     }
 
-    private inputToObjectUpdateHandler(object: any, property: string): ((event: Event) => void) {
+    private inputToObjectUpdateHandler(object: any, property: string, then: () => void): ((event: Event) => void) {
         return (event: Event) => {
             const target = event.target as HTMLInputElement
             object[property] = target.value
-            this.requestUpdate()
+            then()
         }
     }
 
