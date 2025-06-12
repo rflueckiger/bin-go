@@ -99,17 +99,15 @@ export class RewardSimulationDialog extends LitElement {
     }
 
     static styles = css`
-        :host {
-            .preview-table {
-                width: 100%;
-                margin: 1rem 0;
-            }
-            .cell.number, .header-cell.number {
-                text-align: center;
-            }
-            .loading {
-                margin: 1rem 0;
-            }
+        .preview-table {
+            width: 100%;
+            margin: 1rem 0;
+        }
+        .cell.number, .header-cell.number {
+            text-align: center;
+        }
+        .loading {
+            margin: 1rem 0;
         }
     `
 }

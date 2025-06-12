@@ -171,67 +171,66 @@ export class BinGoEditPage extends LitElement {
     }
 
     static styles = css`
-        :host {
-            .action-bar {
-                margin-top: 1.5rem;
-            }
-            .link {
-                color: #16697a;
-                text-decoration: underline;
-            }
-            .link:hover {
-                color: #ffa62b;
-            }
-            .paragraph {
-                max-width: 55ch;
-                margin: 1rem auto;
-                text-align: center;
-            }
-            .title {
-                margin: 1rem 0 0.5rem;
-                font-size: 1.5rem;
-                text-align: center;
-            }
-            .foldable {
-                background: var(--app-color-task-background);
-                border-radius: 5px;
-                padding: 0.1rem 0.5rem;
-                margin-bottom: 1rem;
-            }
-            .task-row {
-                display: flex;
-                gap: 10px;
-                justify-content: center;
-            }
-            .task-item {
-                margin-bottom: 5px;
-            }
-            .task-icon {
-                height: 32px;
-                width: 64px;
-                font-size: 2rem;
-                text-align: center;
-            }
-            .reward-list {
-                margin-bottom: 2rem;
-            }
-            .reward-item {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 0.25rem;
-                margin-top: 0.25rem;
-                gap: 10px;
-                align-items: center;
-            }
-            .list-actions {
-                margin-top: 1rem;
-                text-align: center;
-            }
-            .action-bar {
-                margin-top: 1rem;
-                text-align: center;
-            }
-        }  `
+        .action-bar {
+            margin-top: 1.5rem;
+        }
+        .link {
+            color: #16697a;
+            text-decoration: underline;
+        }
+        .link:hover {
+            color: #ffa62b;
+        }
+        .paragraph {
+            max-width: 55ch;
+            margin: 1rem auto;
+            text-align: center;
+        }
+        .title {
+            margin: 1rem 0 0.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .foldable {
+            background: var(--app-color-task-background);
+            border-radius: 5px;
+            padding: 0.1rem 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .task-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .task-item {
+            margin-bottom: 5px;
+        }
+        .task-icon {
+            height: 32px;
+            width: 64px;
+            font-size: 2rem;
+            text-align: center;
+        }
+        .reward-list {
+            margin-bottom: 2rem;
+        }
+        .reward-item {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.25rem;
+            margin-top: 0.25rem;
+            gap: 10px;
+            align-items: center;
+        }
+        .list-actions {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .action-bar {
+            margin-top: 1rem;
+            text-align: center;
+        }
+    `
 }
 
 declare global {

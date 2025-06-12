@@ -131,40 +131,36 @@ export class BinGoRewardEditor extends LitElement {
     }
 
     static styles = css`
-        :host {
-            :host {
-            }
-            .container {
-                display: flex;
-                gap: 10px;
-                padding: 3px 8px;
-                border-radius: 4px;
-            }
-            .container.common { background: var(--app-color-common); }
-            .container.uncommon { background: var(--app-color-uncommon); }
-            .container.rare { background: var(--app-color-rare); }
-            .container.epic { background: var(--app-color-epic); }
-            .fields-editable {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                row-gap: 5px;
-                column-gap: 10px;
-                background: white;
-                padding: 10px;
-                border-radius: 5px;
-                flex-direction: column;
-            }
-            .label {
-                text-align: right;
-            }
-            .label.has-action {
-                text-decoration: underline dotted;
-                cursor: pointer;
-            }
-            .field-number {
-                width: 25px;
-                text-align: center;
-            }
+        .container {
+            display: flex;
+            gap: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .container.common { background: var(--app-color-common); }
+        .container.uncommon { background: var(--app-color-uncommon); }
+        .container.rare { background: var(--app-color-rare); }
+        .container.epic { background: var(--app-color-epic); }
+        .fields-editable {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            row-gap: 5px;
+            column-gap: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            flex-direction: column;
+        }
+        .label {
+            text-align: right;
+        }
+        .label.has-action {
+            text-decoration: underline dotted;
+            cursor: pointer;
+        }
+        .field-number {
+            width: 25px;
+            text-align: center;
         }
     `
 }

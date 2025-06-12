@@ -28,37 +28,35 @@ export class BinGoReward extends LitElement {
     }
 
     static styles = css`
-        :host {
-            .reward-container {
-                display: flex;
-                gap: 7px;
-                align-items: center;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-            .icon {
-                aspect-ratio: 1;
-                background: white;
-                width: 50px;
-                border-radius: 5px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 32px;
-                margin: 5px;
-            }
-            .reward-container.epic {
-                background: var(--app-color-epic);
-            }
-            .reward-container.rare {
-                background: var(--app-color-rare);
-            }
-            .reward-container.uncommon {
-                background: var(--app-color-uncommon);
-            }
-            .reward-container.common {
-                background: var(--app-color-common);
-            }
+        .reward-container {
+            display: flex;
+            gap: 7px;
+            align-items: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .icon {
+            aspect-ratio: 1;
+            background: white;
+            width: 50px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            margin: 5px;
+        }
+        .reward-container.epic {
+            background: var(--app-color-epic);
+        }
+        .reward-container.rare {
+            background: var(--app-color-rare);
+        }
+        .reward-container.uncommon {
+            background: var(--app-color-uncommon);
+        }
+        .reward-container.common {
+            background: var(--app-color-common);
         }
     `
 }
