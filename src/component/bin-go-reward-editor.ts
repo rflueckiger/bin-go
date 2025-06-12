@@ -60,7 +60,7 @@ export class BinGoRewardEditor extends LitElement {
                     <span>${rewardSpec.icon}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
                     ${rewardSpec.partsToAWhole !== 1 ? html`<span>Collect: ${rewardSpec.partsToAWhole}</span>` : nothing}
-                    ${rewardSpec.owner ? html`<span>${rewardSpec.owner}</span>` : nothing}
+                    ${rewardSpec.sponsor ? html`<span>${rewardSpec.sponsor}</span>` : nothing}
                 </div>
             </div>
         `

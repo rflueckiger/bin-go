@@ -18,7 +18,7 @@ export interface Reward {
     rarity: Rarity
     amount: number
     partsToAWhole: number
-    owner?: string
+    sponsor?: string
     value?: number
     shelfLife?: number
 }

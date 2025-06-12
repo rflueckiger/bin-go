@@ -84,7 +84,7 @@ export class RewardBoxGenerator {
                 rarity: rewardSpec.rarity,
                 amount: this.getAmount(rewardSpec),
                 partsToAWhole: rewardSpec.partsToAWhole,
-                owner: rewardSpec.owner,
+                sponsor: rewardSpec.sponsor,
                 value: rewardSpec.value,
                 shelfLife: rewardSpec.shelfLife
             }

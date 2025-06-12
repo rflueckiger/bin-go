@@ -30,9 +30,9 @@ export interface RewardSpec {
     max: number;        // the max amount gained per reward (the actual value will be random)
     rarity: Rarity;     // the rarity of the reward
     icon: string;       // emoji to represent the reward, support 1 character
-    owner?: string;     // marks that this reward is gifted by someone else and can't be edited
-    value?: number;      // the value in coins of 1 (whole) reward
-    shelfLife?: number;  // undefined = does never expire, 0 = expires when collected (gets converted into coins)
+    sponsor?: string;   // marks that this reward is gifted by someone else and can't be edited
+    value?: number;     // the value in coins of 1 (whole) reward
+    shelfLife?: number; // undefined = does never expire, 0 = expires when collected (gets converted into coins)
                         // TODO: shelf life unit of actual values not yet defined and not yet supported
 }
 

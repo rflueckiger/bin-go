@@ -74,7 +74,7 @@ export class RewardCollection {
         existingReward.description = addedReward.description
         existingReward.rarity = addedReward.rarity
         existingReward.partsToAWhole = addedReward.partsToAWhole
-        existingReward.owner = addedReward.owner
+        existingReward.sponsor = addedReward.sponsor
         existingReward.value = addedReward.value
         existingReward.shelfLife = addedReward.shelfLife
     }

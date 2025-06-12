@@ -96,7 +96,7 @@ export class BinGoEditPage extends LitElement {
                                 this.editing = undefined
                         }}">
                             </bin-go-reward-editor>
-                            ${!this.editing && !this.adding && !spec.owner ? html`<a href="#" @click="${() => this.editing = spec}">Ändern</a>` : nothing }
+                            ${!this.editing && !this.adding && !spec.sponsor ? html`<a href="#" @click="${() => this.editing = spec}">Ändern</a>` : nothing }
                             ${!this.editing && !this.adding ? html`<a href="#" @click="${() => this.removeReward(spec)}">Löschen</a>` : nothing}
                         </div>
                     `
