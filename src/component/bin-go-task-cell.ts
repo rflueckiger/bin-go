@@ -41,9 +41,39 @@ export class BinGoTaskCell extends LitElement {
                  @mouseleave="${this.cancelHold}"
             >
                 <div class="circle"></div>
-                <div class="icon">${this.cellState?.icon}</div>
+                <div class="icon-container">
+                    <image class="icon" src="${this.emojisToImage(this.cellState?.icon)}" />    
+                </div>                
             </div>
         `
+    }
+
+    private emojisToImage(emojis: string | undefined, height = 128): string | null {
+        if (!emojis) {
+            return null
+        }
+
+        const emojiCount = this.countEmojis(emojis)
+        const canvas = document.createElement('canvas')
+        canvas.width = height * emojiCount
+        canvas.height = height
+
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+            return null
+        }
+
+        ctx.font = `${height * 0.8}px sans-serif`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(emojis, (height * emojiCount) / 2, height / 2)
+
+        return canvas.toDataURL('image/png')
+    }
+
+    private countEmojis(emojis: string) {
+        const emojiRegex = /(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:\u200D(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*/gu;
+        return (emojis.match(emojiRegex) || []).length;
     }
 
     private mark() {
@@ -63,15 +93,23 @@ export class BinGoTaskCell extends LitElement {
     }
 
     static styles = css`
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
+        
         .cell {
             padding: 0.5rem;
             border-radius: 5px;
             display: flex;
             user-select: none;
-
+            justify-content: center;
+            height: 100%;
+            
             cursor: pointer;
             background: white;
             font-size: 2.5rem;
+            line-height: 2.5rem;
             
             position: relative;
             overflow: hidden;
@@ -83,10 +121,16 @@ export class BinGoTaskCell extends LitElement {
             transform: scale(1.05);
         }
 
+        .icon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
         .icon {
-            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
             z-index: 2;
-            text-transform: uppercase;
         }
 
         .marked {

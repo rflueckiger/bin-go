@@ -98,7 +98,7 @@ export class BinGoPlayPage extends LitElement {
             const rewardCellState = cellState as RewardCellState
             return html`
                 <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    ${!rewardCellState.marked ? html`<div class="label">${rewardCellState.rewardBox.getQuality() === RewardBoxQuality.superior ? '📦📦' : '📦'}</div>` : nothing }
+                    ${!rewardCellState.marked ? html`<div class="label">${rewardCellState.rewardBox.getQuality() === RewardBoxQuality.superior ? '⭐️' : '📦'}</div>` : nothing }
                 </div>`
         }
         return nothing
@@ -159,7 +159,7 @@ export class BinGoPlayPage extends LitElement {
     static styles = css`
         .board {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr auto;
             grid-gap: 8px;
         }
         .header-row {
@@ -175,7 +175,6 @@ export class BinGoPlayPage extends LitElement {
             border-radius: 5px;
             display: flex;
             user-select: none;
-            min-height: 60px;
         }
 
         .cell .label {
@@ -183,12 +182,11 @@ export class BinGoPlayPage extends LitElement {
             text-transform: uppercase;
         }
 
-        .cell.reward {
-            background: #ffa62b;
-        }
-
         .cell.reward .label {
-            font-size: 2.5rem;
+            font-size: 3.25rem;
+            line-height: 3.25rem;
+            margin: auto;
+            padding: 0.5rem;
         }
 
         .cell.reward.marked {
