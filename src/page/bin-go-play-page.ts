@@ -190,8 +190,7 @@ export class BinGoPlayPage extends LitElement {
         }
 
         .cell.reward.marked {
-            background: #ffa62b;
-            opacity: 0.25;
+            visibility: hidden;
         }
 
         .action-bar {
