@@ -186,7 +186,6 @@ export class BinGoPlayPage extends LitElement {
             font-size: 3.25rem;
             line-height: 3.25rem;
             margin: auto;
-            padding: 0.5rem;
         }
 
         .cell.reward.marked {
