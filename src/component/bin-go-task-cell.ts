@@ -2,6 +2,7 @@ import {LitElement, css, html} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
 import {storage} from "../storage.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
+import {EmojiUtil} from "../domain/util/emoji-util.ts";
 
 @customElement('bin-go-task-cell')
 export class BinGoTaskCell extends LitElement {
@@ -53,7 +54,7 @@ export class BinGoTaskCell extends LitElement {
             return null
         }
 
-        const emojiCount = this.countEmojis(emojis)
+        const emojiCount = EmojiUtil.countEmojis(emojis)
         const canvas = document.createElement('canvas')
         canvas.width = height * emojiCount
         canvas.height = height
@@ -69,11 +70,6 @@ export class BinGoTaskCell extends LitElement {
         ctx.fillText(emojis, (height * emojiCount) / 2, height / 2)
 
         return canvas.toDataURL('image/png')
-    }
-
-    private countEmojis(emojis: string) {
-        const emojiRegex = /(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:\u200D(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F))*/gu;
-        return (emojis.match(emojiRegex) || []).length;
     }
 
     private mark() {
