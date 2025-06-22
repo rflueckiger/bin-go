@@ -1,5 +1,5 @@
 import {css, html, LitElement, nothing} from 'lit'
-import {customElement, state} from 'lit/decorators.js'
+import {customElement, query, state} from 'lit/decorators.js'
 import {storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
@@ -11,12 +11,17 @@ import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
 import '../component/bin-go-inventory.ts';
 import {RewardBoxQuality} from "../domain/reward-box.ts";
+import {BinGoConfirmationDialog} from "../component/bin-go-confirmation-dialog.ts";
+import '../component/bin-go-confirmation-dialog.ts';
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
 
     @state()
     private state?: BoardState
+
+    @query('#reset-board-dialog')
+    resetBoardDialog!: HTMLElement
 
     constructor() {
         super();
@@ -51,7 +56,7 @@ export class BinGoPlayPage extends LitElement {
         return html`
             <div class="header-row">
                 <div class="action-bar bar-left">
-                    <a class="link" href="#" @click="${this.resetState}">Reset</a>
+                    <a class="link" href="#" @click="${this.handleResetStateRequest}">Reset</a>
                 </div>
                 <h1 class="header">BinGo!</h1>
                 <div class="action-bar bar-right">
@@ -61,6 +66,7 @@ export class BinGoPlayPage extends LitElement {
             ${this.renderBoard()}
             <h1 class="header">Inventory</h1>
             <bin-go-inventory></bin-go-inventory>
+            <bin-go-confirmation-dialog id="reset-board-dialog" @confirm="${() => this.resetState()}"></bin-go-confirmation-dialog>
         `
     }
 
@@ -134,10 +140,13 @@ export class BinGoPlayPage extends LitElement {
         this.requestUpdate()
     }
 
-    private resetState(force = false) {
-        if (!force) {
-            // TODO: show confirmation dialog
-        }
+    private handleResetStateRequest() {
+        (this.resetBoardDialog as BinGoConfirmationDialog).show(
+            'Spielbrett zurücksetzen?',
+            'Bist du sicher, dass du das aktuelle Spielbrett zurücksetzen willst?');
+    }
+
+    private resetState() {
         const config = storage.getConfig()
         if (!config) {
             throw new Error('IllegalStateException')
