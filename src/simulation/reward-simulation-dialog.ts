@@ -1,7 +1,6 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
 import {RewardSpec} from "../storage.ts";
-import '../component/bin-go-reward-editor.ts';
 import {RewardSimulation, RewardSimulationResult} from "./reward-simulation.ts";
 import '../component/bin-go-reward.ts'
 
