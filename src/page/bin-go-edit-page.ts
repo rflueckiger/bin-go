@@ -1,11 +1,14 @@
-import {css, html, LitElement, nothing} from 'lit'
+import {css, html, LitElement} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
 import {RewardSpec, storage, Task} from "../storage.ts";
-import '../component/bin-go-reward-editor.ts';
+import '../component/bin-go-reward-spec.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {Rarity} from "../domain/reward.ts";
 import '../simulation/reward-simulation-dialog.ts';
 import {RewardSimulationDialog} from "../simulation/reward-simulation-dialog.ts";
+import {BinGoRewardEditDialog, EditorOperation} from "../component/bin-go-reward-edit-dialog.ts";
+import '../component/bin-go-reward-edit-dialog.ts';
+import {replaceAt} from "../domain/util/array-util.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -16,16 +19,14 @@ export class BinGoEditPage extends LitElement {
 
     private readonly tasks: Task[] = Array.from({ length: 9 }, () => this.taskAndRewardFactory.newTask())
 
-    private readonly rewardSpecs: RewardSpec[] = []
-
     @state()
-    private editing?: RewardSpec = undefined
-
-    @state()
-    private adding?: RewardSpec = undefined
+    private rewardSpecs: RewardSpec[] = []
 
     @query('#simulation-dialog')
     simulationDialog!: HTMLElement
+
+    @query('#reward-editor-dialog')
+    rewardEditorDialog!: HTMLElement
 
     constructor() {
         super();
@@ -62,10 +63,7 @@ export class BinGoEditPage extends LitElement {
             </div>
             ${Object.values(Rarity).map(rarity => this.renderRewardGroup(rarity))}
             <div class="list-actions">
-                <span>Hinzufügen:</span>
-                <a href="#" @click="${() => this.adding = this.taskAndRewardFactory.newCollectibleSpec()}">Sammelstück</a>
-                <a href="#" @click="${() => this.adding = this.taskAndRewardFactory.newCoinsSpec()}">Münzen</a>
-                ${this.adding ? html`<bin-go-reward-editor .rewardSpec="${this.adding}" .editing="${true}" @done="${(event: CustomEvent) => this.addNewRewardSpec(event)}"></bin-go-reward-editor>` : nothing }
+                <a href="#" @click="${this.showNewRewardDialog}">Belohnung hinzufügen</a>
             </div>
 
             <div class="action-bar">
@@ -73,12 +71,9 @@ export class BinGoEditPage extends LitElement {
                 <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
             </div>
             
+            <bin-go-reward-edit-dialog id="reward-editor-dialog" @saved="${this.handleRewardSaved}"></bin-go-reward-edit-dialog>
             <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
         `
-    }
-
-    private showPreview() {
-        (this.simulationDialog as RewardSimulationDialog).showPreview(this.rewardSpecs)
     }
 
     private renderRewardGroup(rarity: Rarity) {
@@ -90,14 +85,9 @@ export class BinGoEditPage extends LitElement {
                     ${specs.map(spec => {
                         return html`
                         <div class="list-item reward-item">
-                            <bin-go-reward-editor .rewardSpec="${spec}" .editing="${this.editing === spec}" @done="${(event: CustomEvent) => {
-                                event.stopPropagation()
-                                this.save()
-                                this.editing = undefined
-                        }}">
-                            </bin-go-reward-editor>
-                            ${!this.editing && !this.adding && !spec.sponsor ? html`<a href="#" @click="${() => this.editing = spec}">Ändern</a>` : nothing }
-                            ${!this.editing && !this.adding ? html`<a href="#" @click="${() => this.removeReward(spec)}">Löschen</a>` : nothing}
+                            <bin-go-reward-spec .rewardSpec="${spec}"></bin-go-reward-spec>
+                            <a href="#" @click="${() => this.showEditRewardDialog(spec)}">Ändern</a>
+                            <a href="#" @click="${() => this.removeReward(spec)}">Löschen</a>
                         </div>
                     `
                     })}
@@ -126,15 +116,33 @@ export class BinGoEditPage extends LitElement {
         this.requestUpdate()
     }
 
-    private addNewRewardSpec(event: CustomEvent) {
-        event.stopPropagation()
-        this.rewardSpecs.push(event.detail)
+    private showEditRewardDialog(rewardSpec: RewardSpec) {
+        (this.rewardEditorDialog as BinGoRewardEditDialog).show(rewardSpec)
+    }
+
+    private showNewRewardDialog() {
+        (this.rewardEditorDialog as BinGoRewardEditDialog).show()
+    }
+
+    private handleRewardSaved(e: Event) {
+        e.stopPropagation()
+
+        const customEvent: CustomEvent = e as CustomEvent;
+        if (customEvent.detail?.operation === EditorOperation.Edit) {
+            this.rewardSpecs = replaceAt(this.rewardSpecs, customEvent.detail.result)
+        } else if (customEvent.detail?.operation === EditorOperation.New) {
+            this.rewardSpecs = [...this.rewardSpecs, customEvent.detail.result]
+        }
+
         this.save()
-        this.adding = undefined
-        this.requestUpdate()
+    }
+
+    private showPreview() {
+        (this.simulationDialog as RewardSimulationDialog).showPreview(this.rewardSpecs)
     }
 
     private renderTaskRow(task: Task) {
+        // TODO: check that only emojis are entered and a maximum of 2 (EmojiUtil.countEmojis)
         return html`
             <div class="list-item task-item">
                 <input class="task-icon" .value="${task.icon}" @input=${this.inputToObjectUpdateHandler(task, 'icon', () => {
