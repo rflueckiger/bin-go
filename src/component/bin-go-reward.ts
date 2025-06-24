@@ -9,7 +9,6 @@ export class BinGoReward extends LitElement {
     public reward?: Reward
 
     render() {
-        // TODO: render remaining attributes directly or in tooltip: description, sponsor, etc.
         if (!this.reward) {
             return nothing;
         }
@@ -34,7 +33,7 @@ export class BinGoReward extends LitElement {
     static styles = css`
         .reward-container {
             display: flex;
-            align-items: center;
+            align-items: start;
             border-radius: 5px;
             cursor: pointer;
         }
