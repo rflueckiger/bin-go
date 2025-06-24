@@ -1,4 +1,4 @@
-import {css, html, LitElement} from 'lit'
+import {css, html, LitElement, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
 import {Reward} from "../domain/reward.ts";
 
@@ -10,35 +10,44 @@ export class BinGoReward extends LitElement {
 
     render() {
         // TODO: render remaining attributes directly or in tooltip: description, sponsor, etc.
+        if (!this.reward) {
+            return nothing;
+        }
+
+        const partsToAWhole = this.reward.partsToAWhole
+        const amount = Math.floor(this.reward.amount / partsToAWhole)
+        const parts = this.reward.amount % partsToAWhole
 
         return html`
             <div class="reward-container ${this.reward?.rarity || 'unknown'}">
                 <div class="icon">${this.reward?.icon || '❔'}</div>
-                ${this.reward?.partsToAWhole === 1 ?
-                    html`
-                        <div class="amount-container">
-                            <span class="amount">${this.reward?.amount || 0}</span>
-                        </div>` :
-                    html`
-                        <div class="amount-container">
-                            <span class="amount">${this.reward?.amount || 0}</span>/
-                            <span class="partsToAWhole">${this.reward?.partsToAWhole || 0}</span>
-                        </div>`}
+                <div class="details">
+                    <div class="amount-container">
+                        <span class="amount">${amount}</span>
+                        <span class="parts">${partsToAWhole > 1 && parts > 0 ? ` ${parts}/${partsToAWhole}` : nothing}</span>
+                    </div>
+                    <div class="description">${this.reward.description}</div>
+                </div>
             </div>`
     }
 
     static styles = css`
         .reward-container {
             display: flex;
-            gap: 7px;
             align-items: center;
             border-radius: 5px;
             cursor: pointer;
+        }
+        .details {
+            margin: auto 5px;
+            padding: 5px 0;
+            overflow: hidden;
         }
         .icon {
             aspect-ratio: 1;
             background: white;
             width: 50px;
+            min-width: 50px;
             border-radius: 5px;
             display: flex;
             justify-content: center;
@@ -57,6 +66,18 @@ export class BinGoReward extends LitElement {
         }
         .reward-container.common {
             background: var(--app-color-common);
+        }
+        .amount-container > .amount {
+            font-weight: bold;
+            font-size: 1.5rem;
+            line-height: 1.5rem;
+        }
+        .amount-container > .parts {
+            color: grey;
+        }
+        .description {
+            font-size: 0.8rem;
+            line-height: 0.8rem;
         }
     `
 }

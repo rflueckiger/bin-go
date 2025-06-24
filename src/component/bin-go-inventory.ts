@@ -103,7 +103,7 @@ export class BinGoInventory extends LitElement {
     static styles = css`
         .reward-layout {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             grid-gap: 1rem;
         }
         .reward-container {
