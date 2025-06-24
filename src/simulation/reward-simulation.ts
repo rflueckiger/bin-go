@@ -56,7 +56,7 @@ export class RewardSimulation {
                 collection: new RewardCollection()
             }
             data.map(d => d[series]).forEach(group => sampleGroup.collection.merge(group.collection.getContent()))
-            sampleGroup.collection.getContent().forEach(reward => reward.amount = reward.amount / sampleCount)
+            sampleGroup.collection.getContent().forEach(reward => reward.amount = Math.floor(reward.amount / sampleCount))
             result.push(sampleGroup)
         }
 
