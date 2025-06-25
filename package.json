@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@shoelace-style/shoelace": "^2.20.1",
     "date-fns": "^4.1.0",
     "lit": "^3.2.1",
     "short-unique-id": "^5.3.2"

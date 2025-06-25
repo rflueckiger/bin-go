@@ -3,12 +3,13 @@ import {customElement, query, state} from 'lit/decorators.js'
 import {RewardSpec} from "../storage.ts";
 import {RewardSimulation, RewardSimulationResult} from "./reward-simulation.ts";
 import '../component/bin-go-reward.ts'
+import {SlDialog} from "@shoelace-style/shoelace";
 
 @customElement('reward-simulation-dialog')
 export class RewardSimulationDialog extends LitElement {
 
     @query('sl-dialog')
-    dialog!: HTMLElement
+    dialog!: SlDialog
 
     @state()
     private calculating = true
@@ -74,7 +75,7 @@ export class RewardSimulationDialog extends LitElement {
         this.calculating = true;
         this.preview = undefined;
 
-        (this.dialog as any).show()
+        this.dialog.show()
 
         this.rewardSimulation.generatePreview(rewardSpecs).then(preview => {
             this.calculating = false
@@ -93,7 +94,7 @@ export class RewardSimulationDialog extends LitElement {
         // TODO: close causes aria issue
         e.preventDefault();
         setTimeout(() => {
-            (this.dialog as any).hide()
+            this.dialog.hide()
         }, 500)
     }
 

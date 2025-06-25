@@ -5,6 +5,7 @@ import {Reward} from "../domain/reward.ts";
 import {Operation, RewardCollection, UNIQUE_REWARD_KEY_COINS} from "../domain/reward-collection.ts";
 import {RewardSorter} from "../domain/sorter/reward-sorter.ts";
 import './bin-go-reward.ts'
+import {SlDialog} from "@shoelace-style/shoelace";
 
 export enum SpendAction {
     SpendForCoins,    // means lose a specific amount of that collectible and convert it to coins
@@ -22,7 +23,7 @@ export class BinGoInventory extends LitElement {
     private selectedReward?: Reward
 
     @query('sl-dialog')
-    dialog!: HTMLElement
+    dialog!: SlDialog
 
     private collectionChangeListener = () => {
         this.updateInventory()
@@ -79,7 +80,7 @@ export class BinGoInventory extends LitElement {
 
         this.collection = storage.loadCollection()
         this.selectedReward = undefined;
-        (this.dialog as any).hide()
+        this.dialog.hide()
         this.requestUpdate()
     }
 
@@ -93,7 +94,7 @@ export class BinGoInventory extends LitElement {
 
     private rewardSelected(reward: Reward) {
         this.selectedReward = reward;
-        (this.dialog as any).show()
+        this.dialog.show()
     }
 
     private updateInventory() {

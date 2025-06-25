@@ -1,5 +1,6 @@
 import {css, html, LitElement, PropertyValues} from 'lit'
 import {customElement, property, query} from 'lit/decorators.js'
+import {SlDialog} from "@shoelace-style/shoelace";
 
 export enum EditorOperation {
     Edit = 'edit',
@@ -10,7 +11,7 @@ export enum EditorOperation {
 export class BinGoConfirmationDialog extends LitElement {
 
     @query('sl-dialog')
-    dialog!: HTMLElement
+    dialog!: SlDialog
 
     @property()
     public title = 'Bestätigen'
@@ -48,11 +49,11 @@ export class BinGoConfirmationDialog extends LitElement {
         this.title = title;
         this.message = message;
         this.scrollY = window.scrollY;
-        (this.dialog as any).show()
+        this.dialog.show()
     }
 
     private cancel() {
-        (this.dialog as any).hide()
+        this.dialog.hide()
     }
 
     private confirm() {
@@ -63,7 +64,7 @@ export class BinGoConfirmationDialog extends LitElement {
         });
 
         this.dispatchEvent(event);
-        (this.dialog as any).hide()
+        this.dialog.hide()
     }
 
     static styles = css``;

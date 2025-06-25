@@ -5,6 +5,7 @@ import {Rarity} from "../domain/reward.ts";
 import {AmountDistributionSimulator} from "../simulation/amount-distribution-simulator.ts";
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {EmojiUtil} from "../domain/util/emoji-util.ts";
+import {SlDialog} from "@shoelace-style/shoelace";
 
 export enum EditorOperation {
     Edit = 'edit',
@@ -18,7 +19,7 @@ export class BinGoRewardEditDialog extends LitElement {
     private taskAndRewardFactory = new TaskAndRewardFactory();
 
     @query('sl-dialog')
-    dialog!: HTMLElement
+    dialog!: SlDialog
 
     @state()
     private operation = EditorOperation.New
@@ -155,7 +156,7 @@ export class BinGoRewardEditDialog extends LitElement {
 
         this.scrollY = window.scrollY;
 
-        (this.dialog as any).show()
+        this.dialog.show()
     }
 
     private applyChanges() {
@@ -169,7 +170,7 @@ export class BinGoRewardEditDialog extends LitElement {
         }
 
         this.sendSavedEvent(this.internalRewardSpec, this.operation);
-        (this.dialog as any).hide()
+        this.dialog.hide()
     }
 
     private validate(rewardSpec: RewardSpec): boolean {
