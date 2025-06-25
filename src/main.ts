@@ -7,3 +7,6 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 // import root component
 import './bin-go-app.ts'
+
+// styles *make sure it's bundled*
+import './index.css'
