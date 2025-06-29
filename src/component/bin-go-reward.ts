@@ -35,7 +35,6 @@ export class BinGoReward extends LitElement {
             display: flex;
             align-items: start;
             border-radius: 5px;
-            cursor: pointer;
         }
         .details {
             margin: auto 5px;

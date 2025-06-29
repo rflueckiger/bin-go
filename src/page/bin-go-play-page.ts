@@ -6,13 +6,17 @@ import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
 import '../component/bin-go-task-cell.ts'
 import {BoardState} from "../domain/board-state.ts";
-import {CellState} from "../domain/cell-state.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
 import '../component/bin-go-inventory.ts';
 import {RewardBoxQuality} from "../domain/reward-box.ts";
 import {BinGoConfirmationDialog} from "../component/bin-go-confirmation-dialog.ts";
 import '../component/bin-go-confirmation-dialog.ts';
+import {CellState} from "../domain/cell-state.ts";
+import {classMap} from 'lit/directives/class-map.js';
+import {AppCollectRewardsDialog} from "../component/app-collect-rewards-dialog.ts";
+import '../component/app-collect-rewards-dialog.ts';
+
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -22,6 +26,9 @@ export class BinGoPlayPage extends LitElement {
 
     @query('#reset-board-dialog')
     resetBoardDialog!: HTMLElement
+
+    @query('#collect-rewards-dialog')
+    collectRewardsDialog!: AppCollectRewardsDialog
 
     constructor() {
         super();
@@ -67,6 +74,7 @@ export class BinGoPlayPage extends LitElement {
             <h1 class="header">Inventory</h1>
             <bin-go-inventory></bin-go-inventory>
             <bin-go-confirmation-dialog id="reset-board-dialog" @confirm="${() => this.resetState()}"></bin-go-confirmation-dialog>
+            <app-collect-rewards-dialog id="collect-rewards-dialog"></app-collect-rewards-dialog>
         `
     }
 
@@ -102,9 +110,10 @@ export class BinGoPlayPage extends LitElement {
             return html`<bin-go-task-cell .cellState="${taskCellState}" @marked="${this.marked}" ></bin-go-task-cell>`
         } else if (cellState.type === 'reward') {
             const rewardCellState = cellState as RewardCellState
+            const classes = { cell: true, reward: true, unlocked: rewardCellState.unlocked, collected: rewardCellState.collected }
             return html`
-                <div class="cell reward ${rewardCellState.marked ? 'marked' : ''}">
-                    ${!rewardCellState.marked ? html`<div class="label">${rewardCellState.rewardBox.getQuality() === RewardBoxQuality.superior ? '⭐️' : '📦'}</div>` : nothing }
+                <div class="${classMap(classes)}" @click="${() => this.collectRewards(rewardCellState)}">
+                    <div class="label">${rewardCellState.rewardBox.getQuality() === RewardBoxQuality.superior ? '⭐️' : '📦'}</div>
                 </div>`
         }
         return nothing
@@ -118,26 +127,45 @@ export class BinGoPlayPage extends LitElement {
         const state = this.state;
 
         // line 1/2/3
-        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[0]));
-        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[1]));
-        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[2]));
+        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[0]));
+        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[1]));
+        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[2]));
 
         // column 1/2/3
-        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[3]));
-        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[4]));
-        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.collectRewards(this.state.rewards[5]));
+        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[3]));
+        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[4]));
+        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[5]));
 
         storage.saveState(this.state)
         this.requestUpdate()
     }
 
-    private collectRewards(rewardCellState: RewardCellState) {
-        if (rewardCellState.marked) {
+    private unlockRewards(rewardCellState: RewardCellState) {
+        if (rewardCellState.unlocked || rewardCellState.collected) {
             return
         }
-        rewardCellState.marked = true
-        storage.updateInventory(rewardCellState.rewardBox.getContent())
-        this.requestUpdate()
+
+        const markedAsUnlocked = storage.markRewardCellUnlocked(rewardCellState.id)
+        if (markedAsUnlocked) {
+            rewardCellState.unlocked = true
+        }
+    }
+
+    private collectRewards(rewardCellState: RewardCellState) {
+        if (!rewardCellState.unlocked || rewardCellState.collected) {
+            return
+        }
+
+        const markedAsCollected = storage.markRewardCellCollected(rewardCellState.id)
+        if (markedAsCollected) {
+            rewardCellState.collected = true;
+
+            const rewards = rewardCellState.rewardBox.getContent()
+            storage.updateInventory(rewards)
+            this.requestUpdate()
+
+            this.collectRewardsDialog.show(rewards)
+        }
     }
 
     private handleResetStateRequest() {
@@ -197,7 +225,7 @@ export class BinGoPlayPage extends LitElement {
             margin: auto;
         }
 
-        .cell.reward.marked {
+        .cell.reward.collected {
             visibility: hidden;
         }
 
@@ -212,6 +240,27 @@ export class BinGoPlayPage extends LitElement {
         }
         .link:hover {
             color: #ffa62b;
+        }
+
+        .cell.reward.unlocked {
+            background: white;
+        }
+        
+        .cell.reward.unlocked > .label {
+            cursor: pointer;
+            display: inline-block;
+            animation: wiggle 3s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            3% { transform: rotate(-10deg); }
+            6% { transform: rotate(10deg); }
+            9% { transform: rotate(-6deg); }
+            12% { transform: rotate(6deg); }
+            15% { transform: rotate(3deg); }
+            18% { transform: rotate(-3deg); }
+            21% { transform: rotate(0deg); }
         }
     `
 }

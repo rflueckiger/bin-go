@@ -52,7 +52,7 @@ export class BinGoInventory extends LitElement {
         } else {
             return html`
                 <div class="reward-layout">
-                    ${this.collection.getContent().sort(this.rewardSorter.rarityDesc).map(reward => html`<bin-go-reward .reward="${reward}" @click="${() => this.rewardSelected(reward)}"></bin-go-reward>`)}
+                    ${this.collection.getContent().sort(this.rewardSorter.rarityDesc).map(reward => html`<bin-go-reward class="reward" .reward="${reward}" @click="${() => this.rewardSelected(reward)}"></bin-go-reward>`)}
                 </div>
                 <sl-dialog class="dialog" no-header>
                     <div class="dialog-title">${this.selectedReward?.icon}</div>
@@ -106,6 +106,9 @@ export class BinGoInventory extends LitElement {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             grid-gap: 1rem;
+        }
+        .reward {
+            cursor: pointer;
         }
     `
 }

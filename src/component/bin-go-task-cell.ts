@@ -78,7 +78,7 @@ export class BinGoTaskCell extends LitElement {
         }
 
         this.cellState.marked = true;
-        storage.updateCellState(this.cellState)
+        storage.markTaskCell(this.cellState.id)
         this.requestUpdate()
 
         this.dispatchEvent(new CustomEvent('marked', {
