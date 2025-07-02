@@ -22,6 +22,15 @@ export class BinGoInventory extends LitElement {
     @state()
     private selectedReward?: Reward
 
+    @state()
+    private spendAmount = 0
+
+    @state()
+    private maxSpend = 0
+
+    @state()
+    private minSpend = 0
+
     @query('sl-dialog')
     dialog!: SlDialog
 
@@ -48,20 +57,38 @@ export class BinGoInventory extends LitElement {
 
     render() {
         if (this.collection.getContent().length <= 0) {
-            return html`No rewards collected yet`
+            return html`Du hast noch keine Belohnungen erhalten`
         } else {
             return html`
                 <div class="reward-layout">
                     ${this.collection.getContent().sort(this.rewardSorter.rarityDesc).map(reward => html`<bin-go-reward class="reward" .reward="${reward}" @click="${() => this.rewardSelected(reward)}"></bin-go-reward>`)}
                 </div>
-                <sl-dialog class="dialog" no-header>
-                    <div class="dialog-title">${this.selectedReward?.icon}</div>
-                    <div class="dialog-text amount">${this.selectedReward?.amount} / ${this.selectedReward?.partsToAWhole}</div>
-                    <button ?disabled="${this.maxSpendAmount(this.selectedReward) <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForEffect, 1)}">1 Einlösen</button>
-                    ${this.selectedReward?.key !== UNIQUE_REWARD_KEY_COINS ? html`<button ?disabled="${this.maxSpendAmount(this.selectedReward) <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForCoins, 1)}">1 Verkaufen</button>` : nothing}
+                <sl-dialog class="dialog" label="Belohnung">
+                    <div class="container">
+                        <bin-go-reward .reward="${this.selectedReward}"></bin-go-reward>
+                        <div class="amount-wrapper">
+                            <span class="label">Anzahl:</span>
+                            <sl-input class="amount" type="number" min="${this.minSpend}" max="${this.maxSpend}" value="${this.spendAmount}" @sl-change=${(e: Event) => this.spendAmount = this.getNumberValue(e)}></sl-input>
+                        </div>
+                        <div class="action-wrapper">
+                            <sl-button class="button" ?disabled="${this.maxSpend <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForEffect, this.spendAmount)}">${this.spendAmount} Einlösen</sl-button>
+                            ${this.canSpendForCoins(this.selectedReward) ? html`
+                                <sl-button class="button" ?disabled="${this.maxSpend <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForCoins, this.spendAmount)}">${this.spendAmount} Verkaufen für ${(this.selectedReward?.value || 0) * this.spendAmount} 🪙</sl-button>    
+                        ` : nothing }
+                        </div>
+                    </div>
                 </sl-dialog>
             `
         }
+    }
+
+    private canSpendForCoins(reward?: Reward) {
+        return reward?.key !== UNIQUE_REWARD_KEY_COINS && reward?.value && reward.value > 0
+    }
+
+    private getNumberValue(e: Event): number {
+        const target = e.target as HTMLInputElement;
+        return Number.parseInt(target.value)
     }
 
     private spendReward(reward: Reward | undefined, action: SpendAction, amount: number) {
@@ -94,6 +121,11 @@ export class BinGoInventory extends LitElement {
 
     private rewardSelected(reward: Reward) {
         this.selectedReward = reward;
+
+        this.maxSpend = this.maxSpendAmount(this.selectedReward)
+        this.minSpend = this.maxSpend > 0 ? 1 : 0
+        this.spendAmount =  Math.min(this.maxSpend, 1)
+
         this.dialog.show()
     }
 
@@ -107,8 +139,28 @@ export class BinGoInventory extends LitElement {
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             grid-gap: 1rem;
         }
+        
         .reward {
             cursor: pointer;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .amount-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1.5rem 0;
+            gap: 0.5rem;
+        }
+        
+        .action-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
     `
 }
