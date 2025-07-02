@@ -22,7 +22,7 @@ export class BinGoReward extends LitElement {
                 <div class="icon">${this.reward?.icon || '❔'}</div>
                 <div class="details">
                     <div class="amount-container">
-                        <span class="amount">${amount}</span>
+                        <span class="amount">${amount > 0 || parts === 0 ? amount : ''}</span>
                         <span class="parts">${partsToAWhole > 1 && parts > 0 ? ` ${parts}/${partsToAWhole}` : nothing}</span>
                     </div>
                     <div class="description">${this.reward.description}</div>
