@@ -1,59 +1,25 @@
-import {css, html, LitElement, PropertyValues} from 'lit'
-import {customElement, property, query} from 'lit/decorators.js'
-import {SlDialog} from "@shoelace-style/shoelace";
-
-export enum EditorOperation {
-    Edit = 'edit',
-    New = 'new'
-}
+import {css, html, TemplateResult} from 'lit'
+import {customElement, property} from 'lit/decorators.js'
+import {AppBaseDialog} from "./base/app-base-dialog.ts";
 
 @customElement('bin-go-confirmation-dialog')
-export class BinGoConfirmationDialog extends LitElement {
-
-    @query('sl-dialog')
-    dialog!: SlDialog
-
-    @property()
-    public title = 'Bestätigen'
+export class BinGoConfirmationDialog extends AppBaseDialog {
 
     @property()
     public message = ''
 
-    private scrollY = 0
-
-    protected firstUpdated(_changedProperties: PropertyValues) {
-        this.dialog.addEventListener('sl-show', () => {
-            // Restore scroll position after dialog opens
-            requestAnimationFrame(() => {
-                window.scrollTo(0, this.scrollY);
-            });
-        })
-        this.dialog.addEventListener('sl-hide', () => {
-            // Restore scroll position after dialog opens
-            requestAnimationFrame(() => {
-                window.scrollTo(0, this.scrollY);
-            });
-        })
-    }
-
-    render() {
+    protected renderContent(): TemplateResult {
         return html`
-            <sl-dialog label="${this.title}">
-                <div>${this.message}</div>
-                <sl-button slot="footer" @click="${this.cancel}">Abbrechen</sl-button>
-                <sl-button slot="footer" variant="primary" @click="${this.confirm}">OK</sl-button>
-            </sl-dialog>`
+            <div>${this.message}</div>
+            <sl-button slot="footer" @click="${super.close}">Abbrechen</sl-button>
+            <sl-button slot="footer" variant="primary" @click="${this.confirm}">OK</sl-button>
+        `
     }
 
     public show(title: string, message: string) {
-        this.title = title;
+        this.dialogTitle = title;
         this.message = message;
-        this.scrollY = window.scrollY;
-        this.dialog.show()
-    }
-
-    private cancel() {
-        this.dialog.hide()
+        super.open()
     }
 
     private confirm() {
@@ -64,7 +30,7 @@ export class BinGoConfirmationDialog extends LitElement {
         });
 
         this.dispatchEvent(event);
-        this.dialog.hide()
+        super.close()
     }
 
     static styles = css``;

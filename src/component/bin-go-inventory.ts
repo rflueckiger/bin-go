@@ -66,6 +66,7 @@ export class BinGoInventory extends LitElement {
                 <sl-dialog class="dialog" label="Belohnung">
                     <div class="container">
                         <bin-go-reward .reward="${this.selectedReward}"></bin-go-reward>
+                        ${this.selectedReward?.sponsor ? html`<div class="sponsor">Sponsor: ${this.selectedReward?.sponsor}</div>` : nothing}
                         <div class="amount-wrapper">
                             <span class="label">Anzahl:</span>
                             <sl-input class="amount" type="number" min="${this.minSpend}" max="${this.maxSpend}" value="${this.spendAmount}" @sl-change=${(e: Event) => this.spendAmount = this.getNumberValue(e)}></sl-input>
@@ -161,6 +162,11 @@ export class BinGoInventory extends LitElement {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
+        }
+        
+        .sponsor {
+            text-align: center;
+            font-size: 0.75rem;
         }
     `
 }

@@ -1,6 +1,7 @@
-import {LitElement, css, html, nothing} from 'lit'
+import {css, html, LitElement, nothing} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {RewardSpec, RewardSpecType} from "../storage.ts";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
+import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
 
 @customElement('bin-go-reward-spec')
 export class BinGoRewardSpec extends LitElement {
@@ -12,6 +13,7 @@ export class BinGoRewardSpec extends LitElement {
         switch (this.rewardSpec?.type) {
             case RewardSpecType.Collectible: return this.handleRewardTypeCollectible(this.rewardSpec)
             case RewardSpecType.Coins: return this.handleRewardTypeCoins(this.rewardSpec)
+            case RewardSpecType.SponsoredCollectible: return this.handleRewardTypeSponsoredCollectible(this.rewardSpec)
             default: throw Error('Unknown reward type')
         }
     }
@@ -34,6 +36,17 @@ export class BinGoRewardSpec extends LitElement {
                 <div>
                     <span>${rewardSpec.icon}</span>
                     <span>${this.renderAmountRange(rewardSpec.min, rewardSpec.max)}</span>
+                </div>
+            </div>
+        `
+    }
+
+    private handleRewardTypeSponsoredCollectible(rewardSpec: RewardSpec) {
+        return html`
+            <div class="container ${rewardSpec.rarity}">
+                <div>
+                    <span>🎁</span>
+                    <span>Sponsor: ${this.rewardSpec?.sponsor}</span>
                 </div>
             </div>
         `

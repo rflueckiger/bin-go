@@ -1,11 +1,12 @@
-import {css, html, LitElement, PropertyValues} from 'lit'
-import {customElement, query, state} from 'lit/decorators.js'
-import {RewardSpec, RewardSpecType} from "../storage.ts";
-import {Rarity} from "../domain/reward.ts";
-import {AmountDistributionSimulator} from "../simulation/amount-distribution-simulator.ts";
+import {css, html, PropertyValues, TemplateResult} from 'lit'
+import {customElement, state} from 'lit/decorators.js'
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {EmojiUtil} from "../domain/util/emoji-util.ts";
-import {SlDialog} from "@shoelace-style/shoelace";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
+import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
+import {AppBaseDialog} from "./base/app-base-dialog.ts";
+import './app-reward-spec-editor.ts';
+import {setNumber} from "../domain/util/input-value-handler.ts";
 
 export enum EditorOperation {
     Edit = 'edit',
@@ -13,13 +14,9 @@ export enum EditorOperation {
 }
 
 @customElement('bin-go-reward-edit-dialog')
-export class BinGoRewardEditDialog extends LitElement {
+export class BinGoRewardEditDialog extends AppBaseDialog {
 
-    private amountDistributionSimulator = new AmountDistributionSimulator();
     private taskAndRewardFactory = new TaskAndRewardFactory();
-
-    @query('sl-dialog')
-    dialog!: SlDialog
 
     @state()
     private operation = EditorOperation.New
@@ -27,29 +24,12 @@ export class BinGoRewardEditDialog extends LitElement {
     @state()
     private internalRewardSpec?: RewardSpec
 
-    private scrollY = 0
-
-    protected firstUpdated(_changedProperties: PropertyValues) {
-        this.dialog.addEventListener('sl-show', () => {
-            // Restore scroll position after dialog opens
-            requestAnimationFrame(() => {
-                window.scrollTo(0, this.scrollY);
-            });
-        })
-        this.dialog.addEventListener('sl-hide', () => {
-            // Restore scroll position after dialog opens
-            requestAnimationFrame(() => {
-                window.scrollTo(0, this.scrollY);
-            });
-        })
+    protected renderContent(): TemplateResult {
+        return html`${this.renderRewardSpecType()}`;
     }
 
-    render() {
-        return html`
-            <sl-dialog label="${this.getDialogTitle()}">
-                ${this.renderRewardSpecType()}
-            </sl-dialog>
-        `
+    protected willUpdate(_changedProperties: PropertyValues) {
+        this.dialogTitle = this.getDialogTitle()
     }
 
     private getDialogTitle(): string {
@@ -91,38 +71,13 @@ export class BinGoRewardEditDialog extends LitElement {
     private handleRewardTypeChoice(e: Event, rewardSpecCreator: () => RewardSpec) {
         e.stopPropagation()
         this.internalRewardSpec = rewardSpecCreator()
-        requestAnimationFrame(() => {
-            window.scrollTo(0, this.scrollY);
-        });
+        requestAnimationFrame(() => this.restoreScrollY());
     }
 
     private handleRewardTypeCollectible() {
-        const spec = this.internalRewardSpec!;
-
-        // TODO: add preview at the top by using reward component directly?
         return html`
             <div class="container">
-                <div class="fields-editable">
-                    <div class="label">Icon</div>
-                    <input class="reward-icon" .value=${spec.icon} @input=${this.updateStringInputHandler(spec, 'icon')}/>
-                    <div class="label">Beschreibung</div>
-                    <input class="reward-description" .value=${spec.description || ''} @input=${this.updateStringInputHandler(spec, 'description')}/>
-                    <div class="label">Rarität</div>
-                    <select class="reward-rarity" .value="${spec.rarity}" @input="${this.updateStringInputHandler(spec, 'rarity')}">
-                        ${Object.keys(Rarity).map(key => {
-                            const value = Rarity[key as keyof typeof Rarity];
-                            return html`<option value="${value}" ?selected="${value === spec.rarity}">${key}</option>`  
-                        })}
-                    </select>
-                    <div class="label has-action" @click="${() => this.amountDistributionSimulator.getAmountDistribution(spec)}">Min</div>
-                    <input class="reward-min field-number" .value=${spec.min} @input=${this.updateNumberInputHandler(spec, 'min')}/>
-                    <div class="label has-action" @click="${() => this.amountDistributionSimulator.getAmountDistribution(spec)}">Max</div>
-                    <input class="reward-max field-number" .value=${spec.max} @input=${this.updateNumberInputHandler(spec, 'max')}/>
-                    <div class="label">Teile für ein Ganzes</div>
-                    <input class="reward-partsToAWhole field-number" .value=${spec.partsToAWhole} @input=${this.updateNumberInputHandler(spec, 'partsToAWhole')}/>
-                    <div class="label">Coins</div>
-                    <input class="reward-value field-number" .value=${spec.value || 0} @input=${this.updateNumberInputHandler(spec, 'value')}/>
-                </div>
+                <app-reward-spec-editor .rewardSpec="${this.internalRewardSpec}"></app-reward-spec-editor>
                 <div class="actions">
                     <a href="#" @click="${this.applyChanges}">Änderungen übernehmen</a>
                 </div>
@@ -133,13 +88,15 @@ export class BinGoRewardEditDialog extends LitElement {
     private handleRewardTypeCoins() {
         const spec = this.internalRewardSpec!
 
+        // TODO: make app-reward-spec-editor configurable (fields array) and re-use here
+
         return html`
             <div class="container">
                 <div class="fields-editable">
                     <div class="label">Min</div>
-                    <input class="reward-min field-number" .value=${spec.min} @input=${this.updateNumberInputHandler(spec, 'min')}/>
+                    <input class="reward-min field-number" .value=${spec.min} @input=${setNumber(spec, 'min')}/>
                     <div class="label">Max</div>
-                    <input class="reward-max field-number" .value=${spec.max} @input=${this.updateNumberInputHandler(spec, 'max')}/>
+                    <input class="reward-max field-number" .value=${spec.max} @input=${setNumber(spec, 'max')}/>
                 </div>
                 <div class="actions">
                     <a href="#" @click="${this.applyChanges}">Änderungen übernehmen</a>
@@ -149,18 +106,19 @@ export class BinGoRewardEditDialog extends LitElement {
     }
 
     public show(rewardSpec?: RewardSpec) {
+        if (rewardSpec?.type === RewardSpecType.SponsoredCollectible) {
+            throw Error('Sponsored rewards cannot be edited.')
+        }
+
         this.operation = rewardSpec ? EditorOperation.Edit : EditorOperation.New
 
         // make shallow copy of original or make sure internal is undefined if no spec is passed
         this.internalRewardSpec = !!rewardSpec ? { ... rewardSpec } : undefined;
 
-        this.scrollY = window.scrollY;
-
-        this.dialog.show()
+        super.open()
     }
 
     private applyChanges() {
-        // TODO: validate inputs, i.e. positive numbers, non-empty icon etc.
         if (!this.internalRewardSpec) {
             return;
         }
@@ -170,11 +128,11 @@ export class BinGoRewardEditDialog extends LitElement {
         }
 
         this.sendSavedEvent(this.internalRewardSpec, this.operation);
-        this.dialog.hide()
+        super.close()
     }
 
     private validate(rewardSpec: RewardSpec): boolean {
-        // TODO: also check that only emojis are present in the string!
+        // TODO: use validator in reward-spec.ts
         if (EmojiUtil.countEmojis(rewardSpec.icon) !== 1
             || !this.isPositiveInt(rewardSpec.partsToAWhole)
             || !this.isPositiveInt(rewardSpec.min)
@@ -207,20 +165,6 @@ export class BinGoRewardEditDialog extends LitElement {
         this.dispatchEvent(event);
     }
 
-    private updateStringInputHandler(object: any, property: string): ((event: Event) => void) {
-        return (event: Event) => {
-            const target = event.target as HTMLInputElement
-            object[property] = target.value
-        }
-    }
-
-    private updateNumberInputHandler(object: any, property: string): ((event: Event) => void) {
-        return (event: Event) => {
-            const target = event.target as HTMLInputElement
-            object[property] = Number(target.value)
-        }
-    }
-
     static styles = css`
         .container {
             display: flex;
@@ -236,6 +180,7 @@ export class BinGoRewardEditDialog extends LitElement {
             text-align: center;
             margin: 1rem;
         }
+        
         .fields-editable {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -246,6 +191,7 @@ export class BinGoRewardEditDialog extends LitElement {
             border-radius: 5px;
             flex-direction: column;
         }
+        
         .label {
             text-align: right;
         }
@@ -253,6 +199,7 @@ export class BinGoRewardEditDialog extends LitElement {
             text-decoration: underline dotted;
             cursor: pointer;
         }
+        
         .field-number {
             width: 25px;
             text-align: center;

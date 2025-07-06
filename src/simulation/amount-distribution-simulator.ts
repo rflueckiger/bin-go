@@ -1,5 +1,5 @@
-import {RewardSpec} from "../storage.ts";
 import {LinearDecayAmountFunction} from "../domain/functions/linear-decay-amount-function.ts";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
 
 type Stat =  { min: number, max: number, label: string, count: number, percentage: number }
 

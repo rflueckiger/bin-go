@@ -1,9 +1,9 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
-import {RewardSpec} from "../storage.ts";
 import {RewardSimulation, RewardSimulationResult} from "./reward-simulation.ts";
 import '../component/bin-go-reward.ts'
 import {SlDialog} from "@shoelace-style/shoelace";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
 
 @customElement('reward-simulation-dialog')
 export class RewardSimulationDialog extends LitElement {

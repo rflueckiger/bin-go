@@ -1,6 +1,6 @@
-import {css, html, LitElement} from 'lit'
+import {css, html, LitElement, nothing} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
-import {RewardSpec, storage, Task} from "../storage.ts";
+import {storage} from "../storage.ts";
 import '../component/bin-go-reward-spec.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {Rarity} from "../domain/reward.ts";
@@ -9,6 +9,11 @@ import {RewardSimulationDialog} from "../simulation/reward-simulation-dialog.ts"
 import {BinGoRewardEditDialog, EditorOperation} from "../component/bin-go-reward-edit-dialog.ts";
 import '../component/bin-go-reward-edit-dialog.ts';
 import {replaceAt} from "../domain/util/array-util.ts";
+import {AppAddSponsoredCollectibleDialog} from "../component/app-add-sponsored-collectible-dialog.ts";
+import '../component/app-add-sponsored-collectible-dialog.ts'
+import {RewardSpec} from "../domain/config/reward-spec.ts";
+import {Task} from "../domain/config/task.ts";
+import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -27,6 +32,9 @@ export class BinGoEditPage extends LitElement {
 
     @query('#reward-editor-dialog')
     rewardEditorDialog!: HTMLElement
+
+    @query('#add-sponsored-collectible-dialog')
+    addSponsoredCollectibleDialog!: AppAddSponsoredCollectibleDialog
 
     constructor() {
         super();
@@ -64,15 +72,17 @@ export class BinGoEditPage extends LitElement {
             ${Object.values(Rarity).map(rarity => this.renderRewardGroup(rarity))}
             <div class="list-actions">
                 <a href="#" @click="${this.showNewRewardDialog}">Belohnung hinzufügen</a>
+                <a href="#" @click="${() => this.addSponsoredCollectibleDialog.open()}">Geheime Belohnung hinzufügen</a>
             </div>
 
             <div class="action-bar">
-                <a class="link" href="#" @click="${this.done}">Fertig</a>
                 <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
+                <a class="link" href="#" @click="${this.done}">Fertig</a>
             </div>
             
             <bin-go-reward-edit-dialog id="reward-editor-dialog" @saved="${this.handleRewardSaved}"></bin-go-reward-edit-dialog>
             <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
+            <app-add-sponsored-collectible-dialog id="add-sponsored-collectible-dialog" @saved="${this.handleRewardSaved}"></app-add-sponsored-collectible-dialog>
         `
     }
 
@@ -86,7 +96,8 @@ export class BinGoEditPage extends LitElement {
                         return html`
                         <div class="list-item reward-item">
                             <bin-go-reward-spec .rewardSpec="${spec}"></bin-go-reward-spec>
-                            <a href="#" @click="${() => this.showEditRewardDialog(spec)}">Ändern</a>
+                            ${spec.type !== RewardSpecType.SponsoredCollectible ? 
+                                    html`<a href="#" @click="${() => this.showEditRewardDialog(spec)}">Ändern</a>` : nothing }
                             <a href="#" @click="${() => this.removeReward(spec)}">Löschen</a>
                         </div>
                     `
@@ -238,10 +249,14 @@ export class BinGoEditPage extends LitElement {
         .list-actions {
             margin-top: 1rem;
             text-align: center;
+            display: flex;
+            flex-direction: column;
         }
         .action-bar {
             margin-top: 1rem;
             text-align: center;
+            display: flex;
+            flex-direction: column;
         }
     `
 }

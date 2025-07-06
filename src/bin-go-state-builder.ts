@@ -1,8 +1,8 @@
-import {AppConfig} from "./storage.ts";
 import {BoardState} from "./domain/board-state.ts";
 import {TaskCellState} from "./domain/task-cell-state.ts";
 import {RewardCellState} from "./domain/reward-cell-state.ts";
 import {RewardBoxGenerator} from "./domain/reward-box-generator.ts";
+import {AppConfig} from "./domain/config/app-config.ts";
 
 export class BinGoStateBuilder {
 

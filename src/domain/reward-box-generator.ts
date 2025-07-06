@@ -1,7 +1,9 @@
 import {Rarity, Reward, RewardType} from "./reward.ts";
-import {RewardSpec, storage} from "../storage.ts";
+import {storage} from "../storage.ts";
 import {LinearDecayAmountFunction} from "./functions/linear-decay-amount-function.ts";
 import {RewardBox} from "./reward-box.ts";
+import {RewardSpec} from "./config/reward-spec.ts";
+import {RewardSpecType} from "./config/reward-spec-type.ts";
 
 export class RewardBoxGenerator {
 
@@ -9,8 +11,11 @@ export class RewardBoxGenerator {
 
     private readonly amountFunction = new LinearDecayAmountFunction();
 
-    public constructor(rewardSpecs: RewardSpec[]) {
+    private readonly obfuscateSponsoredRewards;
+
+    public constructor(rewardSpecs: RewardSpec[], obfuscateSponsoredRewards = false) {
         this.rewardSpecs = rewardSpecs;
+        this.obfuscateSponsoredRewards = obfuscateSponsoredRewards
     }
 
     public generate(): RewardBox {
@@ -75,20 +80,26 @@ export class RewardBoxGenerator {
     }
 
     private createReward(rewardSpec: RewardSpec): Reward {
-        switch (rewardSpec.type) {
-            default: return {
-                type: RewardType.Collectible,
-                key: rewardSpec.key,
-                icon: rewardSpec.icon,
-                description: rewardSpec.description,
-                rarity: rewardSpec.rarity,
-                amount: this.getAmount(rewardSpec),
-                partsToAWhole: rewardSpec.partsToAWhole,
-                sponsor: rewardSpec.sponsor,
-                value: rewardSpec.value,
-                shelfLife: rewardSpec.shelfLife
-            }
+        const reward = {
+            type: RewardType.Collectible,
+            key: rewardSpec.key,
+            icon: rewardSpec.icon,
+            description: rewardSpec.description,
+            rarity: rewardSpec.rarity,
+            amount: this.getAmount(rewardSpec),
+            partsToAWhole: rewardSpec.partsToAWhole,
+            sponsor: rewardSpec.sponsor,
+            value: rewardSpec.value,
+            shelfLife: rewardSpec.shelfLife
         }
+
+        if (this.obfuscateSponsoredRewards && rewardSpec.type === RewardSpecType.SponsoredCollectible) {
+            reward.type = RewardType.Collectible
+            reward.icon = '🎁'
+            reward.description = `Sponsor: ${rewardSpec.sponsor}`
+        }
+
+        return reward
     }
 
     private getAmount(rewardSpec: RewardSpec): number {

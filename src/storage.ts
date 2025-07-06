@@ -5,38 +5,7 @@ import {RewardBox} from "./domain/reward-box.ts";
 import {
     RewardCellStateMigrator_1_markedToUnlockedCollected
 } from "./domain/migration/RewardCellStateMigrator_1_markedToUnlockedCollected.ts";
-
-export interface AppConfig {
-    version: number;
-    tasks: Task[];
-    rewardSpecs: RewardSpec[];
-}
-
-export interface Task {
-    key: string;
-    icon: string;           // emoji to represent the task, supports one or two characters (if the user has choices)
-    description?: string;   // an optional description of the task
-}
-
-export enum RewardSpecType {
-    Coins = 'coins',
-    Collectible = 'collectible'
-}
-
-export interface RewardSpec {
-    type: RewardSpecType;   // i.e. 'collectible', 'coins' -- identifies the reward archetype, i.e. for editor selection
-    key: string;        // the identifier of the reward, same key means the rewards can be combined, i.e. the name of a reward like "cake"
-    description?: string;   // the label of this reward, displayed to the user instead of the technical key
-    partsToAWhole: number;  // whether multiple of these must be collected to generate a whole
-    min: number;        // the min amount gained per reward
-    max: number;        // the max amount gained per reward (the actual value will be random)
-    rarity: Rarity;     // the rarity of the reward
-    icon: string;       // emoji to represent the reward, support 1 character
-    sponsor?: string;   // marks that this reward is gifted by someone else and can't be edited
-    value?: number;     // the value in coins of 1 (whole) reward
-    shelfLife?: number; // undefined = does never expire, 0 = expires when collected (gets converted into coins)
-                        // TODO: shelf life unit of actual values not yet defined and not yet supported
-}
+import {AppConfig} from "./domain/config/app-config.ts";
 
 export class Storage {
 
@@ -60,12 +29,10 @@ export class Storage {
     }
 
     public getConfig(): AppConfig | undefined {
-        console.log('Reading config...')
         const strConfig = localStorage.getItem('config');
 
         if (strConfig) {
             const config = JSON.parse(strConfig)
-            console.log(config)
             const configVersion = Number(config.version);
             if (configVersion === Storage.VERSION) {
                 return config;

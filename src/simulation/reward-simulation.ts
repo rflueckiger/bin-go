@@ -1,7 +1,7 @@
-import {RewardSpec} from "../storage.ts";
 import {RewardBoxGenerator} from "../domain/reward-box-generator.ts";
 import {RewardBox, RewardBoxQuality} from "../domain/reward-box.ts";
 import {RewardCollection} from "../domain/reward-collection.ts";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
 
 type SampleGroup = { picks: number, collection: RewardCollection };
 
@@ -31,7 +31,7 @@ export class RewardSimulation {
     }
 
     private generatePreviewSync(rewardSpecs: RewardSpec[]): RewardSimulationResult {
-        const rewardBoxGenerator = new RewardBoxGenerator(rewardSpecs)
+        const rewardBoxGenerator = new RewardBoxGenerator(rewardSpecs, true)
         // produce a reward set of 6 (1 week) and choose 1, 2, 3, 4, 5. 6 rewards at random (keep collections separate)
         // pick at least 1 high reward spot if possible
         // do this 52 times -> this is one series
