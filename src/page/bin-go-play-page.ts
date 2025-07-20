@@ -16,6 +16,8 @@ import {CellState} from "../domain/cell-state.ts";
 import {classMap} from 'lit/directives/class-map.js';
 import {AppCollectRewardsDialog} from "../component/app-collect-rewards-dialog.ts";
 import '../component/app-collect-rewards-dialog.ts';
+import {RewardCollection} from "../domain/reward-collection.ts";
+import {api} from "../service/service-api.ts";
 
 
 @customElement('bin-go-play-page')
@@ -23,6 +25,9 @@ export class BinGoPlayPage extends LitElement {
 
     @state()
     private state?: BoardState
+
+    @state()
+    private collection?: RewardCollection
 
     @query('#reset-board-dialog')
     resetBoardDialog!: HTMLElement
@@ -40,6 +45,10 @@ export class BinGoPlayPage extends LitElement {
             // if there is no game state or if the game state has expired, create new game state
             this.resetState()
         }
+
+        api.collectionService.getRewardCollection().then(collection => {
+            this.collection = collection
+        })
     }
 
     private hasExpired(state: BoardState) {
@@ -72,7 +81,7 @@ export class BinGoPlayPage extends LitElement {
             </div>            
             ${this.renderBoard()}
             <h1 class="header">Inventory</h1>
-            <bin-go-inventory></bin-go-inventory>
+            <bin-go-inventory .collection="${this.collection}"></bin-go-inventory>
             <bin-go-confirmation-dialog id="reset-board-dialog" @confirm="${() => this.resetState()}"></bin-go-confirmation-dialog>
             <app-collect-rewards-dialog id="collect-rewards-dialog"></app-collect-rewards-dialog>
         `
@@ -161,10 +170,10 @@ export class BinGoPlayPage extends LitElement {
             rewardCellState.collected = true;
 
             const rewards = rewardCellState.rewardBox.getContent()
-            storage.updateInventory(rewards)
-            this.requestUpdate()
-
-            this.collectRewardsDialog.show(rewards)
+            api.collectionService.addRewards(rewards).then(collection => {
+                this.collection = collection
+                this.collectRewardsDialog.show(rewards)
+            })
         }
     }
 

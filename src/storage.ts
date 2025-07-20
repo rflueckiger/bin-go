@@ -1,6 +1,5 @@
 import {BoardState} from "./domain/board-state.ts";
-import {Rarity, Reward} from "./domain/reward.ts";
-import {Operation, RewardCollection} from "./domain/reward-collection.ts";
+import {Rarity} from "./domain/reward.ts";
 import {RewardBox} from "./domain/reward-box.ts";
 import {
     RewardCellStateMigrator_1_markedToUnlockedCollected
@@ -16,16 +15,6 @@ export class Storage {
         [Rarity.Rare]: 50,
         [Rarity.Uncommon]: 200,
         [Rarity.Common]: 350
-    }
-
-    private collectionChangeListeners: (() => void)[] = []
-
-    public addCollectionChangeListener(listener: () => void) {
-        this.collectionChangeListeners.push(listener)
-    }
-
-    public removeCollectionChangeListener(listener: () => void) {
-        this.collectionChangeListeners.splice(this.collectionChangeListeners.indexOf(listener), 1)
     }
 
     public getConfig(): AppConfig | undefined {
@@ -127,49 +116,6 @@ export class Storage {
         cellState.collected = true;
         this.saveState(state);
         return true
-    }
-
-    public loadCollection(): RewardCollection {
-        const serializedCollectionData = localStorage.getItem('collection');
-
-        // no collection exists yet
-        if (!serializedCollectionData) {
-            return this.saveCollection(new RewardCollection())
-        }
-
-        const collectionData = JSON.parse(serializedCollectionData)
-        return new RewardCollection(collectionData.rewards)
-    }
-
-    public saveCollection(collection: RewardCollection): RewardCollection {
-        localStorage.setItem('collection', JSON.stringify({
-            rewards: collection.getContent()
-        }))
-        return collection
-    }
-
-    public updateInventory(rewards: Reward[]) {
-        const collection = this.loadCollection()
-        if (!collection) {
-            throw new Error('Cannot update collection, because collection could not be loaded.')
-        }
-
-        collection.merge(rewards)
-        this.saveCollection(collection)
-        this.collectionChangeListeners.forEach(listener => listener())
-    }
-
-    public changeAmount(rewardKey: string, operation: Operation, amount: number) {
-        const collection = this.loadCollection()
-        if (!collection) {
-            throw new Error('Cannot update collection, because collection could not be loaded.')
-        }
-
-        const success = collection.updateAmount(rewardKey, operation, amount)
-        if (success) {
-            this.saveCollection(collection)
-            this.collectionChangeListeners.forEach(listener => listener())
-        }
     }
 
     public clearState() {

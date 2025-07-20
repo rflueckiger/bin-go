@@ -1,11 +1,12 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, property, query, state} from 'lit/decorators.js'
-import {storage} from "../storage.ts";
 import {Reward} from "../domain/reward.ts";
 import {Operation, RewardCollection, UNIQUE_REWARD_KEY_COINS} from "../domain/reward-collection.ts";
 import {RewardSorter} from "../domain/sorter/reward-sorter.ts";
 import './bin-go-reward.ts'
 import {SlDialog} from "@shoelace-style/shoelace";
+import {api} from "../service/service-api.ts";
+import {ChangeRewardAmount} from "../domain/api/collection-service.ts";
 
 export enum SpendAction {
     SpendForCoins,    // means lose a specific amount of that collectible and convert it to coins
@@ -17,7 +18,7 @@ export enum SpendAction {
 export class BinGoInventory extends LitElement {
 
     @property()
-    private collection: RewardCollection
+    public collection?: RewardCollection
 
     @state()
     private selectedReward?: Reward
@@ -34,29 +35,10 @@ export class BinGoInventory extends LitElement {
     @query('sl-dialog')
     dialog!: SlDialog
 
-    private collectionChangeListener = () => {
-        this.updateInventory()
-    }
-
     private rewardSorter = new RewardSorter()
 
-    constructor() {
-        super();
-        this.collection = storage.loadCollection()
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        storage.addCollectionChangeListener(this.collectionChangeListener);
-    }
-
-    disconnectedCallback() {
-        storage.removeCollectionChangeListener(this.collectionChangeListener)
-        super.disconnectedCallback();
-    }
-
     render() {
-        if (this.collection.getContent().length <= 0) {
+        if (!this.collection || this.collection.getContent().length <= 0) {
             return html`Du hast noch keine Belohnungen erhalten`
         } else {
             return html`
@@ -97,19 +79,32 @@ export class BinGoInventory extends LitElement {
             return;
         }
 
-        const parts = reward.partsToAWhole * amount
-        storage.changeAmount(reward.key, Operation.Subtract, parts)
+        const changes: ChangeRewardAmount[] = []
+
+        changes.push({
+            rewardKey: reward.key,
+            operation: Operation.Subtract,
+            amount: reward.partsToAWhole * amount
+        })
 
         if (action === SpendAction.SpendForCoins) {
             const value = reward.value || 0;
             const coins = value * amount;
-            storage.changeAmount(UNIQUE_REWARD_KEY_COINS, Operation.Add, coins)
+
+            changes.push({
+                rewardKey: UNIQUE_REWARD_KEY_COINS,
+                operation: Operation.Add,
+                amount: coins
+            })
         }
 
-        this.collection = storage.loadCollection()
-        this.selectedReward = undefined;
+        api.collectionService.updateRewardAmount(changes)
+            .then(collection => {
+                this.collection = collection
+                this.selectedReward = undefined;
+            })
+
         this.dialog.hide()
-        this.requestUpdate()
     }
 
     private maxSpendAmount(reward?: Reward): number {
@@ -128,10 +123,6 @@ export class BinGoInventory extends LitElement {
         this.spendAmount =  Math.min(this.maxSpend, 1)
 
         this.dialog.show()
-    }
-
-    private updateInventory() {
-        this.collection = storage.loadCollection()
     }
 
     static styles = css`

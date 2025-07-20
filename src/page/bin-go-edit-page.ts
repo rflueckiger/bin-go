@@ -14,6 +14,7 @@ import '../component/app-add-sponsored-collectible-dialog.ts'
 import {RewardSpec} from "../domain/config/reward-spec.ts";
 import {Task} from "../domain/config/task.ts";
 import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
+import {api} from "../service/service-api.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -139,13 +140,14 @@ export class BinGoEditPage extends LitElement {
         e.stopPropagation()
 
         const customEvent: CustomEvent = e as CustomEvent;
+        const rewardSpec = customEvent.detail.result as RewardSpec
         if (customEvent.detail?.operation === EditorOperation.Edit) {
-            this.rewardSpecs = replaceAt(this.rewardSpecs, customEvent.detail.result)
+            this.rewardSpecs = replaceAt(this.rewardSpecs, rewardSpec)
         } else if (customEvent.detail?.operation === EditorOperation.New) {
-            this.rewardSpecs = [...this.rewardSpecs, customEvent.detail.result]
+            this.rewardSpecs = [...this.rewardSpecs, rewardSpec]
         }
 
-        this.save()
+        this.save(() => api.collectionService.updateReward(rewardSpec))
     }
 
     private showPreview() {
@@ -176,12 +178,15 @@ export class BinGoEditPage extends LitElement {
         this.sendDone();
     }
 
-    private save() {
+    private save(then?: () => void) {
         storage.updateConfig({
             version: this.version,
             tasks: this.tasks,
             rewardSpecs: this.rewardSpecs,
         })
+        if (then) {
+            then()
+        }
     }
 
     private sendDone() {

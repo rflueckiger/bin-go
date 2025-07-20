@@ -20,6 +20,10 @@ export class RewardCollection {
         }
     }
 
+    public getReward(key: string): Reward | undefined {
+        return this.rewards.find(reward => reward.key === key)
+    }
+
     public merge(content: Reward | Reward[]) {
         const rewards = Array.isArray(content) ? content : [content]
 
