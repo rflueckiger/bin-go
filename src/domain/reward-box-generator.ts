@@ -1,9 +1,9 @@
 import {Rarity, Reward, RewardType} from "./reward.ts";
-import {storage} from "../storage.ts";
 import {LinearDecayAmountFunction} from "./functions/linear-decay-amount-function.ts";
 import {RewardBox} from "./reward-box.ts";
 import {RewardSpec} from "./config/reward-spec.ts";
 import {RewardSpecType} from "./config/reward-spec-type.ts";
+import {chances} from "./config/chances.ts";
 
 export class RewardBoxGenerator {
 
@@ -126,7 +126,7 @@ export class RewardBoxGenerator {
     }
 
     private sumRarityChance(rarities: Rarity[]): number {
-        return rarities.map(r => storage.rarityChances[r]).reduce((sum, chance) => sum + chance)
+        return rarities.map(r => chances[r]).reduce((sum, chance) => sum + chance)
     }
 
     private randomInt(min: number, max: number): number {

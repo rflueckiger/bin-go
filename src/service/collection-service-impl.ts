@@ -1,29 +1,32 @@
 import {ChangeRewardAmount, CollectionService} from "../domain/api/collection-service.ts";
 import {Reward} from "../domain/reward.ts";
 import {RewardCollection} from "../domain/reward-collection.ts";
-import localforage from "localforage";
 import {RewardSpec} from "../domain/config/reward-spec.ts";
 
 export class CollectionServiceImpl implements CollectionService {
 
-    private static COLLECTION_STORE = 'collection'
+    private readonly store: LocalForage
+    private readonly rootKey: string
 
-    private lfInstance = localforage.createInstance({ name: "app-data" })
+    constructor(store: LocalForage, rootKey: string) {
+        this.store = store
+        this.rootKey = rootKey
+    }
 
     async getRewardCollection(): Promise<RewardCollection> {
         try {
-            const collectionRaw = await this.lfInstance.getItem(CollectionServiceImpl.COLLECTION_STORE)
+            const collectionRaw = await this.store.getItem(this.rootKey)
             if (collectionRaw && typeof collectionRaw === 'string') {
                 return this.revive(collectionRaw)
             }
 
             // no collection found, check for legacy collection
-            const legacyCollection = localStorage.getItem(CollectionServiceImpl.COLLECTION_STORE)
+            const legacyCollection = localStorage.getItem(this.rootKey)
             if (legacyCollection) {
                 // legacy collection found -> migrate it
-                const collectionMigrated = await this.lfInstance.setItem(CollectionServiceImpl.COLLECTION_STORE, legacyCollection)
+                const collectionMigrated = await this.store.setItem(this.rootKey, legacyCollection)
                 // delete legacy collection
-                localStorage.removeItem(CollectionServiceImpl.COLLECTION_STORE)
+                localStorage.removeItem(this.rootKey)
                 return this.revive(collectionMigrated)
             }
 
@@ -39,7 +42,7 @@ export class CollectionServiceImpl implements CollectionService {
 
     private async save(collection: RewardCollection): Promise<void> {
         // await this.requestPersistentStorage() // TODO: <-- check if this works and/or is used properly
-        await this.lfInstance.setItem(CollectionServiceImpl.COLLECTION_STORE, this.serialize(collection))
+        await this.store.setItem(this.rootKey, this.serialize(collection))
     }
 
     private revive(serialized: string): RewardCollection {

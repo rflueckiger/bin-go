@@ -17,8 +17,7 @@ import {classMap} from 'lit/directives/class-map.js';
 import {AppCollectRewardsDialog} from "../component/app-collect-rewards-dialog.ts";
 import '../component/app-collect-rewards-dialog.ts';
 import {RewardCollection} from "../domain/reward-collection.ts";
-import {api} from "../service/service-api.ts";
-
+import {APP_DATA} from "../service/app-data.ts";
 
 @customElement('bin-go-play-page')
 export class BinGoPlayPage extends LitElement {
@@ -46,7 +45,7 @@ export class BinGoPlayPage extends LitElement {
             this.resetState()
         }
 
-        api.collectionService.getRewardCollection().then(collection => {
+        APP_DATA.collectionService.getRewardCollection().then(collection => {
             this.collection = collection
         })
     }
@@ -170,7 +169,7 @@ export class BinGoPlayPage extends LitElement {
             rewardCellState.collected = true;
 
             const rewards = rewardCellState.rewardBox.getContent()
-            api.collectionService.addRewards(rewards).then(collection => {
+            APP_DATA.collectionService.addRewards(rewards).then(collection => {
                 this.collection = collection
                 this.collectRewardsDialog.show(rewards)
             })
@@ -184,12 +183,13 @@ export class BinGoPlayPage extends LitElement {
     }
 
     private resetState() {
-        const config = storage.getConfig()
-        if (!config) {
-            throw new Error('IllegalStateException')
-        }
-        this.state = new BinGoStateBuilder(config).createState()
-        storage.saveState(this.state)
+        APP_DATA.configService.getConfig().then(config => {
+            if (!config) {
+                throw new Error('IllegalStateException')
+            }
+            this.state = new BinGoStateBuilder(config).createState()
+            storage.saveState(this.state)
+        })
     }
 
     private sendEdit() {

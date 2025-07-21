@@ -1,6 +1,5 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
-import {storage} from "../storage.ts";
 import '../component/bin-go-reward-spec.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {Rarity} from "../domain/reward.ts";
@@ -14,7 +13,8 @@ import '../component/app-add-sponsored-collectible-dialog.ts'
 import {RewardSpec} from "../domain/config/reward-spec.ts";
 import {Task} from "../domain/config/task.ts";
 import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
-import {api} from "../service/service-api.ts";
+import {APP_DATA} from "../service/app-data.ts";
+import {chances} from "../domain/config/chances.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -23,10 +23,11 @@ export class BinGoEditPage extends LitElement {
 
     private taskAndRewardFactory = new TaskAndRewardFactory();
 
-    private readonly tasks: Task[] = Array.from({ length: 9 }, () => this.taskAndRewardFactory.newTask())
+    @state()
+    private tasks: Task[] | undefined
 
     @state()
-    private rewardSpecs: RewardSpec[] = []
+    private rewardSpecs: RewardSpec[] | undefined
 
     @query('#simulation-dialog')
     simulationDialog!: HTMLElement
@@ -40,14 +41,22 @@ export class BinGoEditPage extends LitElement {
     constructor() {
         super();
 
-        const config = storage.getConfig();
-        if (config) {
-            this.tasks = config.tasks;
-            this.rewardSpecs = config.rewardSpecs;
-        }
+        APP_DATA.configService.getConfig().then(config => {
+            if (config) {
+                this.tasks = config.tasks;
+                this.rewardSpecs = config.rewardSpecs;
+            } else {
+                this.tasks = Array.from({ length: 9 }, () => this.taskAndRewardFactory.newTask())
+                this.rewardSpecs = []
+            }
+        })
     }
 
     render() {
+        if (!this.tasks || !this.rewardSpecs) {
+            return nothing
+        }
+
         return html`
             <h3 class="title">Aufgaben</h3>
             <div class="foldable">
@@ -88,7 +97,7 @@ export class BinGoEditPage extends LitElement {
     }
 
     private renderRewardGroup(rarity: Rarity) {
-        const specs = this.rewardSpecs.filter(spec => spec.rarity === rarity);
+        const specs = this.rewardSpecs!.filter(spec => spec.rarity === rarity);
         return html`
             <div class="paragraph"><strong>${this.capitalize(rarity)}</strong>: ${this.dropChance(rarity)}</div>
             ${specs.length > 0 ? html`
@@ -115,7 +124,7 @@ export class BinGoEditPage extends LitElement {
             style: 'percent',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        }).format(storage.rarityChances[rarity] / 1000);
+        }).format(chances[rarity] / 1000);
     }
 
     private capitalize(str: string): string {
@@ -123,6 +132,10 @@ export class BinGoEditPage extends LitElement {
     }
 
     private removeReward(rewardSpec: RewardSpec) {
+        if (!this.rewardSpecs) {
+            return
+        }
+
         this.rewardSpecs.splice(this.rewardSpecs.indexOf(rewardSpec), 1)
         this.save()
         this.requestUpdate()
@@ -139,6 +152,10 @@ export class BinGoEditPage extends LitElement {
     private handleRewardSaved(e: Event) {
         e.stopPropagation()
 
+        if (!this.rewardSpecs) {
+            return
+        }
+
         const customEvent: CustomEvent = e as CustomEvent;
         const rewardSpec = customEvent.detail.result as RewardSpec
         if (customEvent.detail?.operation === EditorOperation.Edit) {
@@ -147,10 +164,14 @@ export class BinGoEditPage extends LitElement {
             this.rewardSpecs = [...this.rewardSpecs, rewardSpec]
         }
 
-        this.save(() => api.collectionService.updateReward(rewardSpec))
+        this.save(() => APP_DATA.collectionService.updateReward(rewardSpec))
     }
 
     private showPreview() {
+        if (!this.rewardSpecs) {
+            return
+        }
+
         (this.simulationDialog as RewardSimulationDialog).showPreview(this.rewardSpecs)
     }
 
@@ -179,14 +200,19 @@ export class BinGoEditPage extends LitElement {
     }
 
     private save(then?: () => void) {
-        storage.updateConfig({
+        if (!this.tasks || !this.rewardSpecs) {
+            return
+        }
+
+        APP_DATA.configService.save({
             version: this.version,
             tasks: this.tasks,
             rewardSpecs: this.rewardSpecs,
+        }).then(() => {
+            if (then) {
+                then()
+            }
         })
-        if (then) {
-            then()
-        }
     }
 
     private sendDone() {

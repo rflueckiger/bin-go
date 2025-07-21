@@ -5,8 +5,8 @@ import {Operation, RewardCollection, UNIQUE_REWARD_KEY_COINS} from "../domain/re
 import {RewardSorter} from "../domain/sorter/reward-sorter.ts";
 import './bin-go-reward.ts'
 import {SlDialog} from "@shoelace-style/shoelace";
-import {api} from "../service/service-api.ts";
 import {ChangeRewardAmount} from "../domain/api/collection-service.ts";
+import {APP_DATA} from "../service/app-data.ts";
 
 export enum SpendAction {
     SpendForCoins,    // means lose a specific amount of that collectible and convert it to coins
@@ -98,7 +98,7 @@ export class BinGoInventory extends LitElement {
             })
         }
 
-        api.collectionService.updateRewardAmount(changes)
+        APP_DATA.collectionService.updateRewardAmount(changes)
             .then(collection => {
                 this.collection = collection
                 this.selectedReward = undefined;

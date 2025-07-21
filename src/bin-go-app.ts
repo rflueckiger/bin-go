@@ -1,10 +1,10 @@
-import {css, html, LitElement} from 'lit'
+import {css, html, LitElement, nothing} from 'lit'
 import {customElement, state} from 'lit/decorators.js'
 import './pwa-badge'
 import './page/bin-go-edit-page.ts'
 import './page/bin-go-play-page.ts'
 import './page/bin-go-sponsor-page.ts'
-import {storage} from "./storage.ts";
+import {APP_DATA} from "./service/app-data.ts";
 
 export enum Page {
     Edit,
@@ -16,7 +16,7 @@ export enum Page {
 export class BinGoApp extends LitElement {
 
     @state()
-    private page = Page.Play;
+    private page: Page | undefined
 
     constructor() {
         super();
@@ -25,13 +25,15 @@ export class BinGoApp extends LitElement {
         if (path.endsWith('/sponsor')) {
             this.page = Page.Sponsor
         } else {
-            const config = storage.getConfig();
-
-            // if there is no config, go to edit mode
-            if (!config) {
-                console.log('No config detected. Going to "edit" mode.')
-                this.page = Page.Edit;
-            }
+            APP_DATA.configService.getConfig().then(config => {
+                // if there is no config, go to edit mode
+                if (!config) {
+                    console.log('No config detected. Going to "edit" mode.')
+                    this.page = Page.Edit
+                } else {
+                    this.page = Page.Play
+                }
+            });
         }
     }
 
@@ -40,6 +42,7 @@ export class BinGoApp extends LitElement {
             case Page.Edit: return html`<bin-go-edit-page @done="${this.handleDoneEditing}"></bin-go-edit-page>`
             case Page.Play: return html`<bin-go-play-page @edit="${this.handleStartEditing}"></bin-go-play-page>`
             case Page.Sponsor: return html`<bin-go-sponsor-page></bin-go-sponsor-page>`
+            default: return nothing
         }
     }
 

@@ -1,49 +1,10 @@
 import {BoardState} from "./domain/board-state.ts";
-import {Rarity} from "./domain/reward.ts";
 import {RewardBox} from "./domain/reward-box.ts";
 import {
     RewardCellStateMigrator_1_markedToUnlockedCollected
 } from "./domain/migration/RewardCellStateMigrator_1_markedToUnlockedCollected.ts";
-import {AppConfig} from "./domain/config/app-config.ts";
 
 export class Storage {
-
-    public static VERSION = 1;
-
-    public rarityChances: { [key in Rarity]: number } = {
-        [Rarity.Epic]: 5,
-        [Rarity.Rare]: 50,
-        [Rarity.Uncommon]: 200,
-        [Rarity.Common]: 350
-    }
-
-    public getConfig(): AppConfig | undefined {
-        const strConfig = localStorage.getItem('config');
-
-        if (strConfig) {
-            const config = JSON.parse(strConfig)
-            const configVersion = Number(config.version);
-            if (configVersion === Storage.VERSION) {
-                return config;
-            } else if (configVersion < Storage.VERSION) {
-                console.log(`Older config detected (version=${config.version}). Current version=${Storage.VERSION}. Config migration necessary...`)
-                // TODO: implement migration handlers when necessary
-                throw new Error('StorageMigrationError')
-            } else if (configVersion > Storage.VERSION) {
-                console.warn(`Newer config detected (version=${config.version}). Current version=${Storage.VERSION}. No migration path...`)
-                // TODO: implement resolution strategy
-                throw new Error('StorageMigrationError')
-            }
-        }
-
-        console.log('No config found.')
-        return undefined;
-    }
-
-    public updateConfig(config: AppConfig) {
-        // TODO: validate / sanitize input
-        localStorage.setItem('config', JSON.stringify(config));
-    }
 
     public loadState(): BoardState | undefined {
         const serializedStateData = localStorage.getItem('state');
@@ -116,11 +77,6 @@ export class Storage {
         cellState.collected = true;
         this.saveState(state);
         return true
-    }
-
-    public clearState() {
-        console.log('Clearing state...')
-        localStorage.removeItem('state');
     }
 }
 
