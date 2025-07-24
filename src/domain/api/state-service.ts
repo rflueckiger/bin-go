@@ -1,5 +1,6 @@
 import {BoardState} from "../board-state.ts";
 import {RewardBox} from "../reward-box.ts";
+import {RewardSpec} from "../config/reward-spec.ts";
 
 export interface StateService {
 
@@ -24,5 +25,12 @@ export interface StateService {
      * @param rewardCellId the id of the unlocked reward cell to collect rewards from
      */
     collectRewards(rewardCellId: number): Promise<RewardBox | undefined>
+
+    /**
+     * Finds all matching rewards in the current state and updates the reward data.
+     *
+     * @param rewardSpec the reward spec whose changes should be applied to matching rewards in the current state
+     */
+    updateReward(rewardSpec: RewardSpec): Promise<BoardState | undefined>
 
 }

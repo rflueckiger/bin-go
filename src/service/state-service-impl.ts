@@ -5,6 +5,7 @@ import {
     RewardCellStateMigrator_1_markedToUnlockedCollected
 } from "../domain/migration/RewardCellStateMigrator_1_markedToUnlockedCollected.ts";
 import {RewardCellState} from "../domain/reward-cell-state.ts";
+import {RewardSpec} from "../domain/config/reward-spec.ts";
 
 export class StateServiceImpl implements StateService {
 
@@ -110,6 +111,31 @@ export class StateServiceImpl implements StateService {
         cellState.collected = true
         await this.save(state)
         return cellState.rewardBox
+    }
+
+    async updateReward(rewardSpec: RewardSpec): Promise<BoardState | undefined> {
+        const state = await this.getState()
+        if (!state) {
+            return
+        }
+
+        // Keep in mind: for instance rarity changes might indirectly affect the quality of the reward box
+        // However, currently the reward box quality is not adjusted to keep the current state as much a
+        // secret as possible and to not allow "reward probing" through spec adjustments.
+        state.rewards
+            .flatMap(rcs => rcs.rewardBox.getContent())
+            .filter(reward => reward.key === rewardSpec.key)
+            .forEach(reward => {
+                reward.icon = rewardSpec.icon
+                reward.description = rewardSpec.description
+                reward.rarity = rewardSpec.rarity
+                reward.partsToAWhole = rewardSpec.partsToAWhole
+                reward.value = rewardSpec.value
+                reward.sponsor = rewardSpec.sponsor
+            })
+
+        await this.save(state)
+        return state
     }
 
 }

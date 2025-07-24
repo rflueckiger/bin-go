@@ -164,7 +164,10 @@ export class BinGoEditPage extends LitElement {
             this.rewardSpecs = [...this.rewardSpecs, rewardSpec]
         }
 
-        this.save(() => APP_DATA.collectionService.updateReward(rewardSpec))
+        this.save(() => {
+            APP_DATA.collectionService.updateReward(rewardSpec)
+            APP_DATA.stateService.updateReward(rewardSpec)
+        })
     }
 
     private showPreview() {
