@@ -1,6 +1,5 @@
 import {LitElement, css, html} from 'lit'
 import {customElement, property} from 'lit/decorators.js'
-import {storage} from "../storage.ts";
 import {TaskCellState} from "../domain/task-cell-state.ts";
 import {EmojiUtil} from "../domain/util/emoji-util.ts";
 
@@ -77,12 +76,10 @@ export class BinGoTaskCell extends LitElement {
             return
         }
 
-        this.cellState.marked = true;
-        storage.markTaskCell(this.cellState.id)
+        this.cellState.marked = true
         this.requestUpdate()
-
         this.dispatchEvent(new CustomEvent('marked', {
-            detail: 'marked',
+            detail: this.cellState.id,
             bubbles: true,
             composed: true
         }));

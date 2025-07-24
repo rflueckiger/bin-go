@@ -1,6 +1,5 @@
 import {css, html, LitElement, nothing} from 'lit'
 import {customElement, query, state} from 'lit/decorators.js'
-import {storage} from "../storage.ts";
 import {BinGoStateBuilder} from "../bin-go-state-builder.ts";
 import {getISOWeek} from "date-fns/getISOWeek";
 import {getYear} from "date-fns/getYear";
@@ -37,13 +36,14 @@ export class BinGoPlayPage extends LitElement {
     constructor() {
         super();
 
-        const state = storage.loadState()
-        if (state && !this.hasExpired(state)) {
-            this.state = state
-        } else {
-            // if there is no game state or if the game state has expired, create new game state
-            this.resetState()
-        }
+        APP_DATA.stateService.getState().then(state => {
+            if (state && !this.hasExpired(state)) {
+                this.state = state
+            } else {
+                // if there is no game state or if the game state has expired, create new game state
+                this.resetState()
+            }
+        })
 
         APP_DATA.collectionService.getRewardCollection().then(collection => {
             this.collection = collection
@@ -127,36 +127,10 @@ export class BinGoPlayPage extends LitElement {
         return nothing
     }
 
-    private marked() {
-        if (!this.state) {
-            return
-        }
-
-        const state = this.state;
-
-        // line 1/2/3
-        [0, 1, 2].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[0]));
-        [3, 4, 5].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[1]));
-        [6, 7, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[2]));
-
-        // column 1/2/3
-        [0, 3, 6].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[3]));
-        [1, 4, 7].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[4]));
-        [2, 5, 8].map(i => state.tasks[i].marked).reduce((rowMarked, cellMarked) => rowMarked && cellMarked) && (this.unlockRewards(this.state.rewards[5]));
-
-        storage.saveState(this.state)
-        this.requestUpdate()
-    }
-
-    private unlockRewards(rewardCellState: RewardCellState) {
-        if (rewardCellState.unlocked || rewardCellState.collected) {
-            return
-        }
-
-        const markedAsUnlocked = storage.markRewardCellUnlocked(rewardCellState.id)
-        if (markedAsUnlocked) {
-            rewardCellState.unlocked = true
-        }
+    private marked(event: Event) {
+        const customEvent = event as CustomEvent
+        const taskCellId = customEvent.detail
+        APP_DATA.stateService.completeTask(taskCellId).then(state => this.state = state)
     }
 
     private collectRewards(rewardCellState: RewardCellState) {
@@ -164,16 +138,15 @@ export class BinGoPlayPage extends LitElement {
             return
         }
 
-        const markedAsCollected = storage.markRewardCellCollected(rewardCellState.id)
-        if (markedAsCollected) {
-            rewardCellState.collected = true;
-
-            const rewards = rewardCellState.rewardBox.getContent()
-            APP_DATA.collectionService.addRewards(rewards).then(collection => {
-                this.collection = collection
-                this.collectRewardsDialog.show(rewards)
-            })
-        }
+        APP_DATA.stateService.collectRewards(rewardCellState.id).then(rewardBox => {
+            if (rewardBox) {
+                rewardCellState.collected = true
+                APP_DATA.collectionService.addRewards(rewardBox.getContent()).then(collection => {
+                    this.collection = collection
+                    this.collectRewardsDialog.show(rewardBox.getContent())
+                })
+            }
+        })
     }
 
     private handleResetStateRequest() {
@@ -187,8 +160,8 @@ export class BinGoPlayPage extends LitElement {
             if (!config) {
                 throw new Error('IllegalStateException')
             }
-            this.state = new BinGoStateBuilder(config).createState()
-            storage.saveState(this.state)
+            const state = new BinGoStateBuilder(config).createState()
+            APP_DATA.stateService.save(state).then(() => this.state = state)
         })
     }
 

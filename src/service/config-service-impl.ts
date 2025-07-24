@@ -18,7 +18,7 @@ export class ConfigServiceImpl implements ConfigService {
                 return this.revive(configRaw)
             }
 
-            // no config found, check for legacy collection
+            // no config found, check for legacy config
             const legacyConfig = localStorage.getItem(this.rootKey)
             if (legacyConfig) {
                 // legacy config found -> migrate it
