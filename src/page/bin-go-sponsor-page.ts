@@ -8,8 +8,10 @@ import {SponsoredCollectibleCode} from "../domain/util/sponsored-collectible-cod
 @customElement('bin-go-sponsor-page')
 export class BinGoSponsorPage extends LitElement {
 
+    private taskAndRewardFactory = new TaskAndRewardFactory()
+
     @state()
-    private rewardSpec: RewardSpec = new TaskAndRewardFactory().newCollectibleSpec()
+    private rewardSpec: RewardSpec = this.taskAndRewardFactory.newCollectibleSpec()
 
     @state()
     private code = ''
@@ -32,6 +34,7 @@ export class BinGoSponsorPage extends LitElement {
 
     private generateCode() {
         try {
+            this.rewardSpec.key = this.taskAndRewardFactory.newKey()
             const code = SponsoredCollectibleCode.fromRewardSpec(this.rewardSpec)
             this.code = code.asString()
         } catch(e) {
