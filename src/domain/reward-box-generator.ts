@@ -67,8 +67,18 @@ export class RewardBoxGenerator {
     private getRandomReward(rewardSpecs: RewardSpec[], rarity: Rarity): Reward | null {
         const matchingRewardSpecs = rewardSpecs.filter(spec => spec.rarity === rarity)
         if (matchingRewardSpecs.length > 0) {
-            const randomIndex = this.randomInt(0, matchingRewardSpecs.length - 1)
-            return this.createReward(matchingRewardSpecs[randomIndex])
+
+            // grouping reward specs in loot groups (i.e. sponsored rewards are grouped together)
+            const rewardSpecGroups = this.groupRewardSpecs(matchingRewardSpecs)
+            const randomGroupIndex = this.randomInt(0, rewardSpecGroups.length - 1)
+            const rewardSpecGroup = rewardSpecGroups[randomGroupIndex]
+
+            if (rewardSpecGroup.length === 1) {
+                return this.createReward(rewardSpecGroup[0])
+            } else {
+                const randomIndex = this.randomInt(0, rewardSpecGroup.length - 1)
+                return this.createReward(rewardSpecGroup[randomIndex])
+            }
         }
 
         const lowerRarity = this.getNextLowerRarity(rarity)
@@ -77,6 +87,23 @@ export class RewardBoxGenerator {
         }
 
         return null
+    }
+
+    private groupRewardSpecs(rewardSpecs: RewardSpec[]): RewardSpec[][] {
+        const groups = new Map<string, RewardSpec[]>();
+        rewardSpecs.forEach(rewardSpec => {
+            if (rewardSpec.type === RewardSpecType.SponsoredCollectible) {
+                const sponsoredGroup = groups.get(RewardSpecType.SponsoredCollectible)
+                if (sponsoredGroup) {
+                    sponsoredGroup.push(rewardSpec)
+                } else {
+                    groups.set(RewardSpecType.SponsoredCollectible, [rewardSpec])
+                }
+            } else {
+                groups.set(rewardSpec.key, [rewardSpec])
+            }
+        })
+        return Array.from(groups.values())
     }
 
     private createReward(rewardSpec: RewardSpec): Reward {
