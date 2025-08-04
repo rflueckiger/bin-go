@@ -9,6 +9,9 @@ export class BinGoRewardSpec extends LitElement {
     @property()
     public rewardSpec?: RewardSpec;
 
+    @property({ type: Boolean })
+    public inCollection = false
+
     render() {
         switch (this.rewardSpec?.type) {
             case RewardSpecType.Collectible: return this.handleRewardTypeCollectible(this.rewardSpec)
@@ -45,7 +48,7 @@ export class BinGoRewardSpec extends LitElement {
         return html`
             <div class="container ${rewardSpec.rarity}">
                 <div>
-                    <span>🎁</span>
+                    <span>${this.inCollection ? html`${rewardSpec.icon}` : html`🎁`}</span>
                     <span>Sponsor: ${this.rewardSpec?.sponsor}</span>
                 </div>
             </div>

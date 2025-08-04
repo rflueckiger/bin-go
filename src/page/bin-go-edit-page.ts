@@ -15,6 +15,7 @@ import {Task} from "../domain/config/task.ts";
 import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
 import {APP_DATA} from "../service/app-data.ts";
 import {chances} from "../domain/config/chances.ts";
+import {RewardCollection} from "../domain/reward-collection.ts";
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -25,6 +26,9 @@ export class BinGoEditPage extends LitElement {
 
     @state()
     private tasks: Task[] | undefined
+
+    @state()
+    private collection: RewardCollection | undefined
 
     @state()
     private rewardSpecs: RewardSpec[] | undefined
@@ -50,6 +54,8 @@ export class BinGoEditPage extends LitElement {
                 this.rewardSpecs = []
             }
         })
+
+        APP_DATA.collectionService.getRewardCollection().then(c => this.collection = c)
     }
 
     render() {
@@ -103,9 +109,10 @@ export class BinGoEditPage extends LitElement {
             ${specs.length > 0 ? html`
                 <div class="list reward-list">
                     ${specs.map(spec => {
+                        const inCollection = this.isInCollection(spec)
                         return html`
                         <div class="list-item reward-item">
-                            <bin-go-reward-spec .rewardSpec="${spec}"></bin-go-reward-spec>
+                            <bin-go-reward-spec .rewardSpec="${spec}" ?inCollection="${inCollection}"></bin-go-reward-spec>
                             ${spec.type !== RewardSpecType.SponsoredCollectible ? 
                                     html`<a href="#" @click="${() => this.showEditRewardDialog(spec)}">Ändern</a>` : nothing }
                             <a href="#" @click="${() => this.removeReward(spec)}">Löschen</a>
@@ -117,6 +124,13 @@ export class BinGoEditPage extends LitElement {
                <div class="paragraph">Keine Belohnungen</div>
             ` }
         `
+    }
+
+    private isInCollection(rewardSpec: RewardSpec): boolean {
+        if (!this.collection) {
+            return false
+        }
+        return !!this.collection.getContent().find(reward => reward.key == rewardSpec.key)
     }
 
     private dropChance(rarity: Rarity): string {
