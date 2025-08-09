@@ -8,13 +8,13 @@ export class TaskAndRewardFactory {
 
     private static readonly UID = new ShortUniqueId({ length: 6 });
 
-    public newKey(): string {
+    public static newKey(): string {
         return TaskAndRewardFactory.UID.rnd()
     }
 
     public newTask(): Task {
         return {
-            key: this.newKey(),
+            key: TaskAndRewardFactory.newKey(),
             icon: '🤷'
         }
     }
@@ -22,7 +22,7 @@ export class TaskAndRewardFactory {
     public newCollectibleSpec(): RewardSpec {
         return {
             type: RewardSpecType.Collectible,
-            key: this.newKey(),
+            key: TaskAndRewardFactory.newKey(),
             icon: '🧩',
             min: 1,
             max: 1,
@@ -34,7 +34,7 @@ export class TaskAndRewardFactory {
     public newCoinsSpec(): RewardSpec {
         return {
             type: RewardSpecType.Coins,
-            key: this.newKey(),
+            key: TaskAndRewardFactory.newKey(),
             icon: '🪙',
             min: 1,
             max: 8,

@@ -34,7 +34,7 @@ export class BinGoSponsorPage extends LitElement {
 
     private generateCode() {
         try {
-            this.rewardSpec.key = this.taskAndRewardFactory.newKey()
+            this.rewardSpec.key = TaskAndRewardFactory.newKey()
             const code = SponsoredCollectibleCode.fromRewardSpec(this.rewardSpec)
             this.code = code.asString()
         } catch(e) {
