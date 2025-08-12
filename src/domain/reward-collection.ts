@@ -57,6 +57,15 @@ export class RewardCollection {
         return false
     }
 
+    public remove(rewardKey: string): boolean {
+        const index = this.rewards.findIndex(reward => reward.key === rewardKey)
+        if (index >= 0) {
+            this.rewards.splice(index, 1)
+            return true
+        }
+        return false
+    }
+
     private convertToCoins(reward: Reward) {
         if (!reward.value || reward.value <= 0) {
             return;

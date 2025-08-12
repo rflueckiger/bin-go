@@ -22,4 +22,7 @@ export interface CollectionService {
     /* Update the amount of the specified reward by the given amount */
     updateRewardAmount(changes: ChangeRewardAmount[]): Promise<RewardCollection>
 
+    /* Removes all rewards with the given keys completely from the collection */
+    purgeRewards(rewardKeys: string[]): Promise<RewardCollection>
+
 }

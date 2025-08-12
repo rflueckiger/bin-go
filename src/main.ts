@@ -9,6 +9,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/qr-code/qr-code.js';
+import '@shoelace-style/shoelace/dist/components/details/details.js';
 
 // import root component
 import './bin-go-app.ts'

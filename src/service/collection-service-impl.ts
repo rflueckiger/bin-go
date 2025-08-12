@@ -100,6 +100,21 @@ export class CollectionServiceImpl implements CollectionService {
         return await this.getRewardCollection()
     }
 
+    async purgeRewards(rewardKeys: string[]): Promise<RewardCollection> {
+        const collection = await this.getRewardCollection()
+
+        let collectionChanged = false
+        rewardKeys.forEach(rewardKey => {
+            collectionChanged = collectionChanged || collection.remove(rewardKey)
+        })
+
+        if (collectionChanged) {
+            await this.save(collection)
+        }
+
+        return await this.getRewardCollection()
+    }
+
     // @ts-ignore
     private async requestPersistentStorage(): Promise<boolean> {
         if (navigator.storage && navigator.storage.persist) {

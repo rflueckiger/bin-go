@@ -80,10 +80,14 @@ export class BinGoPlayPage extends LitElement {
             </div>            
             ${this.renderBoard()}
             <h1 class="header">Inventory</h1>
-            <bin-go-inventory .collection="${this.collection}"></bin-go-inventory>
+            <bin-go-inventory .collection="${this.collection}" @changed="${this.collectionChanged}"></bin-go-inventory>
             <bin-go-confirmation-dialog id="reset-board-dialog" @confirm="${() => this.resetState()}"></bin-go-confirmation-dialog>
             <app-collect-rewards-dialog id="collect-rewards-dialog"></app-collect-rewards-dialog>
         `
+    }
+
+    private collectionChanged(e: Event) {
+        this.collection = (e as CustomEvent).detail as RewardCollection
     }
 
     private renderBoard() {

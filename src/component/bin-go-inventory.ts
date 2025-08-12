@@ -59,10 +59,21 @@ export class BinGoInventory extends LitElement {
                                 <sl-button class="button" ?disabled="${this.maxSpend <= 0}" @click="${() => this.spendReward(this.selectedReward, SpendAction.SpendForCoins, this.spendAmount)}">${this.spendAmount} Verkaufen für ${(this.selectedReward?.value || 0) * this.spendAmount} 🪙</sl-button>    
                         ` : nothing }
                         </div>
+                        <sl-details class="more-options" summary="Weitere Optionen...">
+                            <sl-button class="button" variant="danger" @click="${() => this.removeReward(this.selectedReward!.key)}">Belohnung entfernen!</sl-button>
+                        </sl-details>
                     </div>
                 </sl-dialog>
             `
         }
+    }
+
+    private removeReward(rewardKey: string) {
+        APP_DATA.collectionService.purgeRewards([rewardKey]).then(collection => {
+            this.collection = collection
+            this.sendChangedEvent(collection)
+        })
+        this.dialog.hide()
     }
 
     private canSpendForCoins(reward?: Reward) {
@@ -102,6 +113,7 @@ export class BinGoInventory extends LitElement {
             .then(collection => {
                 this.collection = collection
                 this.selectedReward = undefined;
+                this.sendChangedEvent(collection)
             })
 
         this.dialog.hide()
@@ -122,7 +134,23 @@ export class BinGoInventory extends LitElement {
         this.minSpend = this.maxSpend > 0 ? 1 : 0
         this.spendAmount =  Math.min(this.maxSpend, 1)
 
+        // make sure details part is always closed initially when opening the dialog
+        const details = this.dialog?.querySelector('sl-details')
+        if (details) {
+            details.open = false
+        }
+
         this.dialog.show()
+    }
+
+    private sendChangedEvent(collection: RewardCollection) {
+        const event = new CustomEvent('changed', {
+            detail: collection,
+            bubbles: true,
+            composed: true
+        });
+
+        this.dispatchEvent(event);
     }
 
     static styles = css`
@@ -153,6 +181,14 @@ export class BinGoInventory extends LitElement {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
+        }
+
+        .more-options {
+            margin-top: 1rem;
+        }
+        
+        .more-options > .button {
+            width: 100%;
         }
         
         .sponsor {
