@@ -64,41 +64,51 @@ export class BinGoEditPage extends LitElement {
         }
 
         return html`
-            <h3 class="title">Aufgaben</h3>
-            <div class="foldable">
-                <div class="paragraph">Definiere deine 9 Aufgaben, die du idealerweise jede Woche erledigen möchtest.
-                    Es müssen nicht 9 verschiedene Aufgaben sein. Damit aber die App funktioniert, macht es Sinn, wenn
-                    es zumindest 5-7 verschiedene sind.</div>
-                <div class="paragraph">Die Reihenfolge der Aufgaben hier spielt keine Rolle. Verwende jeweils 1 Emoji um deine Aufgaben darzustellen.</div>
-            </div>
-            <div class="list task-list">
-                <div class="task-row">${this.tasks.slice(0, 3).map(task => this.renderTaskRow(task))}</div>
-                <div class="task-row">${this.tasks.slice(3, 6).map(task => this.renderTaskRow(task))}</div>
-                <div class="task-row">${this.tasks.slice(6, 9).map(task => this.renderTaskRow(task))}</div>
+            <div class="header-bar">
+                <a class="link" href="#" @click="${this.done}">&lt;&lt; Zurück</a>
+                <h1 class="title">Konfiguration</h1>
             </div>
             
-            <h3 class="title">Belohnungen</h3>
-            <div class="foldable">
-                <div class="paragraph">Hier kannst du deine Belohnungen erfassen. Belohnungen gehören jeweils zu einer von 4 Raritätsstufen: Common, Uncommon, Rare und Epic</div>
-                <div class="paragraph">Eine Belohnung der Gruppe Common erhältst du immer!</div>
-                <div class="paragraph">Unten siehst du jeweils wie gross die Chance ist, dass zusätzlich eine Belohnung einer bestimmten Gruppe erscheint.
-                    Innerhalb einer Gruppe ist die Chance dann jeweils für alle Belohnungen gleich.</div>
-                <div class="paragraph">Idealerweise erfasst für jede Gruppe mindestens 3-4 Belohnungen um das Spiel spannend zu halten.</div>
-            </div>
-            ${Object.values(Rarity).map(rarity => this.renderRewardGroup(rarity))}
-            <div class="list-actions">
-                <a href="#" @click="${this.showNewRewardDialog}">Belohnung hinzufügen</a>
-                <a href="#" @click="${() => this.addSponsoredCollectibleDialog.open()}">Geheime Belohnung hinzufügen</a>
-            </div>
+            <sl-tab-group>
+                <sl-tab slot="nav" panel="tasks">Aufgaben</sl-tab>
+                <sl-tab slot="nav" panel="rewards">Belohnungen</sl-tab>
+                
+                <sl-tab-panel name="tasks">
+                    <div class="foldable">
+                        <div class="paragraph">Definiere deine 9 Aufgaben, die du idealerweise jede Woche erledigen möchtest.
+                            Es müssen nicht 9 verschiedene Aufgaben sein. Damit aber die App funktioniert, macht es Sinn, wenn
+                            es zumindest 5-7 verschiedene sind.</div>
+                        <div class="paragraph">Die Reihenfolge der Aufgaben hier spielt keine Rolle. Verwende jeweils 1 Emoji um deine Aufgaben darzustellen.</div>
+                    </div>
+                    <div class="list task-list">
+                        <div class="task-row">${this.tasks.slice(0, 3).map(task => this.renderTaskRow(task))}</div>
+                        <div class="task-row">${this.tasks.slice(3, 6).map(task => this.renderTaskRow(task))}</div>
+                        <div class="task-row">${this.tasks.slice(6, 9).map(task => this.renderTaskRow(task))}</div>
+                    </div>
+                </sl-tab-panel>
+                <sl-tab-panel name="rewards">
+                    <div class="foldable">
+                        <div class="paragraph">Hier kannst du deine Belohnungen erfassen. Belohnungen gehören jeweils zu einer von 4 Raritätsstufen: Common, Uncommon, Rare und Epic</div>
+                        <div class="paragraph">Eine Belohnung der Gruppe Common erhältst du immer!</div>
+                        <div class="paragraph">Unten siehst du jeweils wie gross die Chance ist, dass zusätzlich eine Belohnung einer bestimmten Gruppe erscheint.
+                            Innerhalb einer Gruppe ist die Chance dann jeweils für alle Belohnungen gleich.</div>
+                        <div class="paragraph">Idealerweise erfasst für jede Gruppe mindestens 3-4 Belohnungen um das Spiel spannend zu halten.</div>
+                    </div>
+                    ${Object.values(Rarity).map(rarity => this.renderRewardGroup(rarity))}
+                    <div class="list-actions">
+                        <a href="#" @click="${this.showNewRewardDialog}">Belohnung hinzufügen</a>
+                        <a href="#" @click="${() => this.addSponsoredCollectibleDialog.open()}">Geheime Belohnung hinzufügen</a>
+                    </div>
 
-            <div class="action-bar">
-                <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
-                <a class="link" href="#" @click="${this.done}">Fertig</a>
-            </div>
-            
-            <bin-go-reward-edit-dialog id="reward-editor-dialog" @saved="${this.handleRewardSaved}"></bin-go-reward-edit-dialog>
-            <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
-            <app-add-sponsored-collectible-dialog id="add-sponsored-collectible-dialog" @saved="${this.handleRewardSaved}"></app-add-sponsored-collectible-dialog>
+                    <div class="action-bar">
+                        <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
+                    </div>
+                    
+                    <bin-go-reward-edit-dialog id="reward-editor-dialog" @saved="${this.handleRewardSaved}"></bin-go-reward-edit-dialog>
+                    <app-add-sponsored-collectible-dialog id="add-sponsored-collectible-dialog" @saved="${this.handleRewardSaved}"></app-add-sponsored-collectible-dialog>
+                    <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
+                </sl-tab-panel>
+            </sl-tab-group>           
         `
     }
 
@@ -243,9 +253,6 @@ export class BinGoEditPage extends LitElement {
     }
 
     static styles = css`
-        .action-bar {
-            margin-top: 1.5rem;
-        }
         .link {
             color: #16697a;
             text-decoration: underline;
@@ -259,8 +266,6 @@ export class BinGoEditPage extends LitElement {
             text-align: center;
         }
         .title {
-            margin: 1rem 0 0.5rem;
-            font-size: 1.5rem;
             text-align: center;
         }
         .foldable {
