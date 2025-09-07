@@ -80,7 +80,7 @@ export class BinGoPlayPage extends LitElement {
             </div>            
             ${this.renderBoard()}
             <h1 class="header">Inventory</h1>
-            <bin-go-inventory .collection="${this.collection}" @changed="${this.collectionChanged}"></bin-go-inventory>
+            <bin-go-inventory class="inventory" .collection="${this.collection}" @changed="${this.collectionChanged}"></bin-go-inventory>
             <bin-go-confirmation-dialog id="reset-board-dialog" @confirm="${() => this.resetState()}"></bin-go-confirmation-dialog>
             <app-collect-rewards-dialog id="collect-rewards-dialog"></app-collect-rewards-dialog>
         `
@@ -180,14 +180,20 @@ export class BinGoPlayPage extends LitElement {
     }
 
     static styles = css`
+        :host {
+            display: flex;
+            flex-direction: column;
+        }
         .board {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr auto;
             grid-gap: 8px;
+            margin: 0 var(--app-content-horizontal-margin);
         }
         .header-row {
             display: flex;
             align-items: baseline;
+            margin: 0 var(--app-content-horizontal-margin);
         }
         .header {
             text-align: center;
@@ -214,7 +220,11 @@ export class BinGoPlayPage extends LitElement {
         .cell.reward.collected {
             visibility: hidden;
         }
-
+        
+        .inventory {
+            margin: 0 var(--app-content-horizontal-margin);
+        }
+        
         .action-bar {
             display: flex;
             gap: 0.5rem;

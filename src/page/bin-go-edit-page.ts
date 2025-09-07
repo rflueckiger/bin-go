@@ -3,8 +3,6 @@ import {customElement, query, state} from 'lit/decorators.js'
 import '../component/bin-go-reward-spec.ts';
 import {TaskAndRewardFactory} from "../domain/task-and-reward-factory.ts";
 import {Rarity} from "../domain/reward.ts";
-import '../simulation/reward-simulation-dialog.ts';
-import {RewardSimulationDialog} from "../simulation/reward-simulation-dialog.ts";
 import {BinGoRewardEditDialog, EditorOperation} from "../component/bin-go-reward-edit-dialog.ts";
 import '../component/bin-go-reward-edit-dialog.ts';
 import {replaceAt} from "../domain/util/array-util.ts";
@@ -16,6 +14,9 @@ import {RewardSpecType} from "../domain/config/reward-spec-type.ts";
 import {APP_DATA} from "../service/app-data.ts";
 import {chances} from "../domain/config/chances.ts";
 import {RewardCollection} from "../domain/reward-collection.ts";
+import chevronLeft from '../assets/icons/chevron-left.svg?raw';
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+import '../simulation/reward-simulation-panel.ts';
 
 @customElement('bin-go-edit-page')
 export class BinGoEditPage extends LitElement {
@@ -32,9 +33,6 @@ export class BinGoEditPage extends LitElement {
 
     @state()
     private rewardSpecs: RewardSpec[] | undefined
-
-    @query('#simulation-dialog')
-    simulationDialog!: HTMLElement
 
     @query('#reward-editor-dialog')
     rewardEditorDialog!: HTMLElement
@@ -65,20 +63,23 @@ export class BinGoEditPage extends LitElement {
 
         return html`
             <div class="header-bar">
-                <a class="link" href="#" @click="${this.done}">&lt;&lt; Zurück</a>
-                <h1 class="title">Konfiguration</h1>
+                <div class="action" @click="${this.done}">
+                    <div class="icon">${unsafeSVG(chevronLeft)}</div>
+                    <span class="label">Zurück</span>
+                </div>
             </div>
             
             <sl-tab-group>
                 <sl-tab slot="nav" panel="tasks">Aufgaben</sl-tab>
                 <sl-tab slot="nav" panel="rewards">Belohnungen</sl-tab>
+                <sl-tab slot="nav" panel="simulation">Simulation</sl-tab>
                 
-                <sl-tab-panel name="tasks">
+                <sl-tab-panel class="panel" name="tasks">
                     <div class="foldable">
                         <div class="paragraph">Definiere deine 9 Aufgaben, die du idealerweise jede Woche erledigen möchtest.
                             Es müssen nicht 9 verschiedene Aufgaben sein. Damit aber die App funktioniert, macht es Sinn, wenn
                             es zumindest 5-7 verschiedene sind.</div>
-                        <div class="paragraph">Die Reihenfolge der Aufgaben hier spielt keine Rolle. Verwende jeweils 1 Emoji um deine Aufgaben darzustellen.</div>
+                        <div class="paragraph">Die Reihenfolge der Aufgaben hier spielt keine Rolle. Verwende jeweils 1-2 Emojis um deine Aufgaben darzustellen.</div>
                     </div>
                     <div class="list task-list">
                         <div class="task-row">${this.tasks.slice(0, 3).map(task => this.renderTaskRow(task))}</div>
@@ -86,7 +87,8 @@ export class BinGoEditPage extends LitElement {
                         <div class="task-row">${this.tasks.slice(6, 9).map(task => this.renderTaskRow(task))}</div>
                     </div>
                 </sl-tab-panel>
-                <sl-tab-panel name="rewards">
+                
+                <sl-tab-panel class="panel" name="rewards">
                     <div class="foldable">
                         <div class="paragraph">Hier kannst du deine Belohnungen erfassen. Belohnungen gehören jeweils zu einer von 4 Raritätsstufen: Common, Uncommon, Rare und Epic</div>
                         <div class="paragraph">Eine Belohnung der Gruppe Common erhältst du immer!</div>
@@ -99,14 +101,13 @@ export class BinGoEditPage extends LitElement {
                         <a href="#" @click="${this.showNewRewardDialog}">Belohnung hinzufügen</a>
                         <a href="#" @click="${() => this.addSponsoredCollectibleDialog.open()}">Geheime Belohnung hinzufügen</a>
                     </div>
-
-                    <div class="action-bar">
-                        <a class="link" href="#" @click="${() => this.showPreview()}">Simulation</a>
-                    </div>
                     
                     <bin-go-reward-edit-dialog id="reward-editor-dialog" @saved="${this.handleRewardSaved}"></bin-go-reward-edit-dialog>
                     <app-add-sponsored-collectible-dialog id="add-sponsored-collectible-dialog" @saved="${this.handleRewardSaved}"></app-add-sponsored-collectible-dialog>
-                    <reward-simulation-dialog id="simulation-dialog"></reward-simulation-dialog>
+                </sl-tab-panel>
+                
+                <sl-tab-panel class="panel" name="simulation">
+                    <reward-simulation-panel .rewardSpecs="${this.rewardSpecs}"></reward-simulation-panel>    
                 </sl-tab-panel>
             </sl-tab-group>           
         `
@@ -194,14 +195,6 @@ export class BinGoEditPage extends LitElement {
         })
     }
 
-    private showPreview() {
-        if (!this.rewardSpecs) {
-            return
-        }
-
-        (this.simulationDialog as RewardSimulationDialog).showPreview(this.rewardSpecs)
-    }
-
     private renderTaskRow(task: Task) {
         // TODO: check that only emojis are entered and a maximum of 2 (EmojiUtil.countEmojis)
         return html`
@@ -253,12 +246,29 @@ export class BinGoEditPage extends LitElement {
     }
 
     static styles = css`
+        .header-bar {
+            display: flex;
+            margin: var(--app-content-vertical-margin) var(--app-content-horizontal-margin) 0;
+        }
+        .action {
+            display: flex;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .action:hover > .icon,
+        .action:hover > .label {
+            color: #ffa62b;
+        }
         .link {
+            cursor: pointer;
             color: #16697a;
             text-decoration: underline;
         }
         .link:hover {
             color: #ffa62b;
+        }
+        .panel {
+            margin: 0 var(--app-content-horizontal-margin);
         }
         .paragraph {
             max-width: 55ch;

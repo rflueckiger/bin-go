@@ -58,7 +58,6 @@ export class BinGoApp extends LitElement {
         :host {
             max-width: 640px;
             margin: 0 auto;
-            padding: 2rem;
             width: 100%;
         }  `
 }
